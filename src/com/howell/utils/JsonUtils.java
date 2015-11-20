@@ -99,7 +99,19 @@ public class JsonUtils {
 				System.out.println("comment is null");
 			}
 			String mapFormat = item.getString("MapFormat"); 
-			maps.add(new Map(id,name,comment,mapFormat));
+			String mD5Code = "";
+			try{
+				mD5Code = item.getString("MD5Code");
+			}catch(Exception e){
+				System.out.println("mD5Code is null");
+			}
+			String lastModificationTime = "";
+			try{
+				lastModificationTime = item.getString("LastModificationTime");
+			}catch(Exception e){
+				System.out.println("lastModificationTime is null");
+			}
+			maps.add(new Map(id,name,comment,mapFormat,mD5Code,lastModificationTime));
 		}
 		return new MapList(new Page(pageIndex, pageSize,pageCount,recordCount,totalRecordCount),maps);
 	}

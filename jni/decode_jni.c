@@ -204,7 +204,8 @@ static PLAY_HANDLE init_play_handle(int is_playback ,SYSTEMTIME beg,SYSTEMTIME e
 	}else{//回放
 		__android_log_print(ANDROID_LOG_INFO, "jni", "is_playback :%d ,user_hanle%d",is_playback,res->user_handle);
 		file_stream_t file_info;
-		res->file_stream_handle = hwnet_get_file_stream(res->user_handle,slot,beg,end,on_file_stream_fun,0,&file_info);
+		res->file_stream_handle = hwnet_get_file_stream_ex2(res->user_handle,slot,1,beg,end,0,0,on_file_stream_fun,0,&file_info);
+		//res->file_stream_handle = hwnet_get_file_stream(res->user_handle,slot,beg,end,on_file_stream_fun,0,&file_info);
 		__android_log_print(ANDROID_LOG_INFO, "jni", "file_stream_handle: %d",res->file_stream_handle);
 		int b = hwnet_get_file_stream_head(res->file_stream_handle,(char*)&media_head,1024,&res->media_head_len);
 		//media_head.adec_code = 0xa;

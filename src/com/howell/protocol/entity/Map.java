@@ -15,6 +15,9 @@ public class Map implements Serializable{
 	private String mapFormat;
 	private String dataPath;
 	
+	private String MD5Code;
+	private String lastModificationTime;
+	
 	private boolean hasAlarm;
 	
 	public Map(String id, String name, String comment, String mapFormat) {
@@ -35,6 +38,31 @@ public class Map implements Serializable{
 		this.comment = comment;
 		this.mapFormat = mapFormat;
 		this.dataPath = data;
+		hasAlarm = false;
+	}
+	
+	public Map(String id, String name, String comment, String mapFormat
+		, String mD5Code, String lastModificationTime) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.comment = comment;
+		this.mapFormat = mapFormat;
+		MD5Code = mD5Code;
+		this.lastModificationTime = lastModificationTime;
+		hasAlarm = false;
+	}
+
+	public Map(String id, String name, String comment, String mapFormat,
+			String dataPath, String mD5Code, String lastModificationTime) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.comment = comment;
+		this.mapFormat = mapFormat;
+		this.dataPath = dataPath;
+		MD5Code = mD5Code;
+		this.lastModificationTime = lastModificationTime;
 		hasAlarm = false;
 	}
 
@@ -84,11 +112,32 @@ public class Map implements Serializable{
 	}
 
 
+	public String getMD5Code() {
+		return MD5Code;
+	}
+
+
+	public void setMD5Code(String mD5Code) {
+		MD5Code = mD5Code;
+	}
+
+
+	public String getLastModificationTime() {
+		return lastModificationTime;
+	}
+
+
+	public void setLastModificationTime(String lastModificationTime) {
+		this.lastModificationTime = lastModificationTime;
+	}
+
+
 	@Override
 	public String toString() {
-		return "Map [id=" + id + ", name=" + name + ", comment=" + comment + ",dataPath="
-				+ dataPath
-				+ ", mapFormat=" + mapFormat + ", hasAlarm=" + hasAlarm + "]";
+		return "Map [id=" + id + ", name=" + name + ", comment=" + comment
+				+ ", mapFormat=" + mapFormat + ", dataPath=" + dataPath
+				+ ", MD5Code=" + MD5Code + ", lastModificationTime="
+				+ lastModificationTime + ", hasAlarm=" + hasAlarm + "]";
 	}
 
 }

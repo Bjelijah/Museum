@@ -48,20 +48,7 @@ public class MyService extends Service{
 		Log.e("alarmStreamFun",eventNotify.toString());
     	String componentId = eventNotify.getId();
     	String name = eventNotify.getName();
-//    	String time = ((EventNotifyRes) res).getEventNotify().getTime();
-//    	int year = ((EventNotifyRes) res).getEventNotify().getDateYear(time);
-//    	int month = ((EventNotifyRes) res).getEventNotify().getDateMonth(time);
-//    	int day = ((EventNotifyRes) res).getEventNotify().getDateDay(time);
-//    	int hour = ((EventNotifyRes) res).getEventNotify().getDateHour(time);
-//    	int min = ((EventNotifyRes) res).getEventNotify().getDateMin(time);
-//    	int sec = ((EventNotifyRes) res).getEventNotify().getDateSec(time);
-//    	String eventType = ((EventNotifyRes) res).getEventNotify().getEventType();
 //    	String eventState = ((EventNotifyRes) res).getEventNotify().getEventState();
-//    	String pictureUrl = "";
-//    	if(((EventNotifyRes) res).getEventNotify().getImageUrl() != null)
-//    		pictureUrl = ((EventNotifyRes) res).getEventNotify().getImageUrl();
-//    	
-//		System.out.println("alarmStreamFun componentId:" + componentId + ",name:" + name );
     	//isAlarmed 0：未查看警报 1：已查看警报
     	if(!mgr.containsEventNotify(eventNotify)){
     		mgr.addAlarmList(eventNotify);
@@ -70,21 +57,8 @@ public class MyService extends Service{
 			mgr.updateEventNotifyAlarmFlag(eventNotify);
 		}
 		
-//		final Camera camera = new Camera(componentId,name,pictureUrl,eventType,eventState,year,month,day,hour,min,sec);
-//		if(!mgr.containsElement(camera)){
-//			mgr.add(camera);  
-//		}else{
-//		camera.isShown = 1;
-//		mgr.updateCameraIsShownFlag(camera);
-//		}
 		//设置内存里设备的id(notification id)号
 		int temp_id = mgr.selectEventNotifySqlKey(eventNotify);
-//		if(temp_id != -1){
-//			camera._id = tempC._id;
-//			System.out.println("camera id:"+camera._id);
-//			tempC = null;
-//		}
-//		System.out.println("camera:"+camera.toString());
 			
 		//发送Action为com.howell.formuseum.RECEIVER的广播  
 		my_intent.putExtra("ret", 2); 
@@ -105,14 +79,9 @@ public class MyService extends Service{
 	    CharSequence contentText = name + "入侵警报";  
 	    Intent notificationIntent = new Intent(this,LogoActivity.class);
 	    notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//	        notificationIntent.putExtra("ip", ip);
-//	        notificationIntent.putExtra("name", name);
-//	        System.out.println("alarmStreamFun2 slot:"+slot + " ip:"+ip + " name:"+name);
 	    PendingIntent contentIntent = PendingIntent.getActivity(context, temp_id, notificationIntent,PendingIntent.FLAG_UPDATE_CURRENT );  
 	    mNotification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);  
 	    mNotificationManager.notify(temp_id,mNotification);  
-//		System.out.println("alarmStreamFun camera._id:"+camera._id + " ip:"+ip + " name:"+name);
-//		}
 	}
 	
 	private void start(final String websocket_ip,final String session) {
@@ -156,7 +125,9 @@ public class MyService extends Service{
 //								alarmStreamFun(((EventNotifyRes) res).getEventNotify().getId(),1,Utils.parseUrl(((EventNotifyRes) res).getEventNotify().getImageUrl()),((EventNotifyRes) res).getEventNotify().getName()
 //										,((EventNotifyRes) res).getEventNotify().getDateYear(),((EventNotifyRes) res).getEventNotify().getDateMonth(),((EventNotifyRes) res).getEventNotify().getDateDay()
 //										,((EventNotifyRes) res).getEventNotify().getDateHour(),((EventNotifyRes) res).getEventNotify().getDateMin(),((EventNotifyRes) res).getEventNotify().getDateSec());
-								alarmStreamFun((EventNotifyRes)res);
+								if(((EventNotifyRes) res).getEventNotify().getEventState().equals("Active")){
+									alarmStreamFun((EventNotifyRes)res);
+								}
 								
 								mConnection.sendTextMessage(WebSocketProtocolUtils.createADCResJSONObject(((EventNotifyRes) res).getcSeq()).toString());
 							}else if(res instanceof KeepAliveRes){

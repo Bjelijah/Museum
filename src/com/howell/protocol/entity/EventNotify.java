@@ -169,7 +169,8 @@ public class EventNotify implements Serializable{
 		return "EventNotify [id=" + id + ", name=" + name + ", eventType="
 				+ eventType + ", eventState=" + eventState + ", time=" + time
 				+ ", path=" + path + ", description=" + description
-				+ ", extendInformation=" + extendInformation + "imageUrl=" + imageUrl + "]";
+				+ ", extendInformation=" + extendInformation + "imageUrl=" + imageUrl 
+				+ ",isAlarmed = " + isAlarmed +"]";
 	}
 	
 	

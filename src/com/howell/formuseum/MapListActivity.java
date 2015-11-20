@@ -17,8 +17,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
@@ -27,7 +30,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.howell.db.DBManager;
@@ -41,6 +43,7 @@ import com.howell.protocol.entity.MapList;
 import com.howell.utils.CacheUtils;
 import com.howell.utils.JsonUtils;
 import com.howell.utils.MD5;
+import com.howell.utils.Utils;
 
 /**
  * @author 霍之昊 
@@ -150,6 +153,29 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 		listview.setAdapter(adapter);
 	}
 	
+	private boolean compareString(String s1,String s2){
+		return s1.equals(s2);
+	}
+	
+	private boolean isMapUpdate(ArrayList<Map> newMaps,ArrayList<Map> oldMaps){
+		if(newMaps.size() != oldMaps.size()){
+			//平台传入的地图列表个数与之前不一样，重新更新
+			Log.e("","有更新");
+			return true;
+		}else{
+			//平台传入的地图列表个数与之前一样，检查每个map的md5码和子模块更新时间
+			for(int i = 0 ; i < newMaps.size() ; i ++){
+				if(!compareString(newMaps.get(i).getMD5Code(),oldMaps.get(i).getMD5Code())
+						|| !compareString(newMaps.get(i).getLastModificationTime(),oldMaps.get(i).getLastModificationTime())){
+					Log.e("","有更新");
+					return true;
+				}
+			}
+		}
+		Log.e("","没有更新");
+		return false;
+	}
+	
 	private void getMaps(){
 //		int width = PhoneConfigUtils.getPhoneWidth(this);
 //		int height = PhoneConfigUtils.getPhoneHeight(this);
@@ -160,7 +186,7 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 //				byte[] data = hp.mapsData(webserviceIp, map.getId(), cookieHalf+"verifysession="+MD5.getMD5("GET:"+"/howell/ver10/data_service/management/System/Maps/"+map.getId()+"/Data:"+verify));
 				//存于文件中
 //				CacheUtils.saveBmpToSd(ScaleImageUtils.decodeByteArray(width, height, data), map.getId());
-				Map m = new Map(map.getId(),map.getName(),map.getComment(),map.getMapFormat(),CacheUtils.getBitmapCachePath()+map.getId());
+				Map m = new Map(map.getId(),map.getName(),map.getComment(),map.getMapFormat(),CacheUtils.getBitmapCachePath()+map.getId(),map.getMD5Code(),map.getLastModificationTime());
 				mapList.add(m);
 				//存于数据库中
 				mgr.addMap(m);
@@ -185,6 +211,15 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 			e.printStackTrace();
 		}
 	}
+	
+	private void updateMaps(){
+		mgr.deleteTable("map");
+		mgr.deleteTable("map_item");
+		mgr.deleteTable("alarm_list");
+		mapList.clear();
+		CacheUtils.removeCache(CacheUtils.getBitmapCachePath());
+		getMaps();
+	}
 
 	@Override
 	public void onRefresh() {
@@ -194,12 +229,7 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 			@Override
 			protected Void doInBackground(Void... arg0) {
 				// TODO Auto-generated method stub
-				mgr.deleteTable("map");
-				mgr.deleteTable("map_item");
-				mgr.deleteTable("alarm_list");
-				mapList.clear();
-				CacheUtils.removeCache(CacheUtils.getBitmapCachePath());
-				getMaps();
+				updateMaps();
 				return null;
 			}
 			
@@ -218,11 +248,30 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 		// TODO Auto-generated method stub
 		mgr = new DBManager(this);
 		mapList = mgr.queryMap();
-		if(mapList.size() == 0){
+		MapList maps;
+		try {
+			maps = JsonUtils.parseMapsJsonObject(new JSONObject(hp.maps(webserviceIp, 1, 10,cookieHalf+"verifysession="+MD5.getMD5("GET:"+"/howell/ver10/data_service/management/System/Maps:"+verify))));
+			//判断是否有更新
+			if(isMapUpdate(maps.getMap(), mapList)){
+				updateMaps();
+			}
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		//if(mapList.size() == 0){
 			//Toast.makeText(MapListActivity.this, "第一次加载可能需要几分钟时间，请耐心等待", 1000).show();
 			//从平台获取地图信息
-			getMaps();
-		}
+		//	getMaps();
+		//}
 	}
 
 	@Override
@@ -232,6 +281,22 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 		adapter.setMapList(mapList);
 		updateAlarm();
 		listview.onRefreshComplete();
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// TODO Auto-generated method stub
+		menu.add("退出登录");
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// TODO Auto-generated method stub
+		Intent intent = new Intent(this,LoginActivity.class);
+		startActivity(intent);
+		finish();
+		return super.onOptionsItemSelected(item);
 	}
 	
 	class MapListAdapter extends BaseAdapter {
@@ -282,7 +347,7 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 	    	}else{
 	         	holder = (ViewHolder)convertView.getTag();
 	        }
-	    	holder.mapName.setText(mapList.get(position).getName());
+	    	holder.mapName.setText(Utils.utf8Togb2312(new String(Base64.decode(mapList.get(position).getName(),0))));
 	    	if(mapList.get(position).isHasAlarm()){
 	    		holder.alarmIcon.setVisibility(View.VISIBLE);
 	    	}else{

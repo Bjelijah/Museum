@@ -42,7 +42,7 @@ public class DBManager {
 	public synchronized void addMap(Map map) {
         db.beginTransaction();	//开始事务
         try {
-        	db.execSQL("INSERT INTO map VALUES(NULL,?, ?, ?, ? , ? )", new Object[]{map.getId(),map.getName(),map.getComment(),map.getMapFormat(),map.getDataPath()});
+        	db.execSQL("INSERT INTO map VALUES(NULL,?, ?, ?, ? , ? , ? , ? )", new Object[]{map.getId(),map.getName(),map.getComment(),map.getMapFormat(),map.getDataPath(),map.getMD5Code(),map.getLastModificationTime()});
         	db.setTransactionSuccessful();	//设置事务成功完成
         } finally {
         	db.endTransaction();	//结束事务
@@ -148,6 +148,8 @@ public class DBManager {
         	map.setComment(c.getString(c.getColumnIndex("comment")));
         	map.setMapFormat(c.getString(c.getColumnIndex("mapFormat")));
         	map.setDataPath(c.getString(c.getColumnIndex("mapDataPath")));
+        	map.setMD5Code(c.getString(c.getColumnIndex("MD5Code")));
+        	map.setLastModificationTime(c.getString(c.getColumnIndex("lastModificationTime")));
         	list.add(map);
         }
         c.close();
@@ -196,6 +198,7 @@ public class DBManager {
 	
 	public synchronized void updateEventNotifyAlarmFlag(EventNotify eventNotify){
 		ContentValues cv = new ContentValues();
+		cv.put("name", eventNotify.getName());
 		cv.put("time", eventNotify.getTime());
 		cv.put("isAlarmed", eventNotify.getIsAlarmed());
 		cv.put("imageUrl", eventNotify.getImageUrl());
@@ -234,6 +237,28 @@ public class DBManager {
 	        	item.setEventState(c.getString(c.getColumnIndex("eventState")));
 	        	item.setTime(c.getString(c.getColumnIndex("time")));
 	        	item.setImageUrl(c.getString(c.getColumnIndex("imageUrl")));
+	        	list.add(item);
+        	}
+        }
+        c.close();
+        return list;
+	}
+	
+	//查询某个地图下的所有报警列表
+	public synchronized ArrayList<EventNotify> queryAllAlarmListWithMapId(String mapId) {
+		ArrayList<EventNotify> list = new ArrayList<EventNotify>();
+		Cursor c = queryTheCursor("alarm_list");
+        while (c.moveToNext()) {
+        	if(c.getString(c.getColumnIndex("mapId")).equals(mapId)){
+	        	EventNotify item = new EventNotify();
+	        	item.setId(c.getString(c.getColumnIndex("componentId")));
+	        	item.setName(c.getString(c.getColumnIndex("name")));
+	        	item.setMapId(c.getString(c.getColumnIndex("mapId")));
+	        	item.setEventType(c.getString(c.getColumnIndex("eventType")));
+	        	item.setEventState(c.getString(c.getColumnIndex("eventState")));
+	        	item.setTime(c.getString(c.getColumnIndex("time")));
+	        	item.setImageUrl(c.getString(c.getColumnIndex("imageUrl")));
+	        	item.setIsAlarmed(c.getInt(c.getColumnIndex("isAlarmed")));
 	        	list.add(item);
         	}
         }

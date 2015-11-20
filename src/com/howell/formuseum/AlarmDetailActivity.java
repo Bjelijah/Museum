@@ -258,11 +258,8 @@ public class AlarmDetailActivity extends Activity implements OnTouchListener{
 					final EditText et = (EditText) view.findViewById(R.id.process_dialog_edittext);
 					Log.e("process", et.getText().toString());
 					//发送报警处理协议
-					new AsyncTask<Void, Integer, Void>(){
-
-						@Override
-						protected Void doInBackground(Void... arg0) {
-							// TODO Auto-generated method stub
+					new Thread(){
+						public void run() {
 							try {
 								hp.process(webserviceIp, eventNotify.getId(), et.getText().toString(), cookieHalf+"verifysession="+MD5.getMD5("POST:"+"/howell/ver10/data_service/Business/Informations/IO/Inputs/Channels/"+eventNotify.getId()+"/Status/Process"+":"+verify));
 							} catch (NoSuchAlgorithmException e) {
@@ -275,10 +272,8 @@ public class AlarmDetailActivity extends Activity implements OnTouchListener{
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-							return null;
-						}
-						
-					}.execute();
+						};
+					}.start();
 				}
 			});
 			dialog.setNegativeButton("取消", new OnClickListener() {

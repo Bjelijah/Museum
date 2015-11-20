@@ -27,10 +27,12 @@ import android.content.Intent;
 import android.opengl.GLSurfaceView;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
 import android.view.SurfaceHolder.Callback;
+import android.widget.Toast;
 
 /**
  * @author 霍之昊 
@@ -53,6 +55,9 @@ public class PlayerActivity extends Activity implements Callback{
 	
 	private	boolean isPlayback;
 	
+	private static final int LOGIN_FAIL = 1;
+	private static final int SHOW_INFO = 2;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -60,7 +65,9 @@ public class PlayerActivity extends Activity implements Callback{
 		setContentView(R.layout.player);
 		isPlayback = init();
 		Log.e("", "isPlayback:"+isPlayback);
-		new AsyncTask<Void, Integer, Void>() {
+		PlayerThread thread = new PlayerThread();
+		thread.start();
+		/*new AsyncTask<Void, Integer, Void>() {
 			boolean ret = false;
 			@Override
 			protected Void doInBackground(Void... arg0) {
@@ -97,8 +104,55 @@ public class PlayerActivity extends Activity implements Callback{
 				}
 			};
 			
-		}.execute();
+		}.execute();*/
 	}
+	
+	private class PlayerThread extends Thread{
+		
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			super.run();
+			boolean ret = false;
+			getEventLinkage();
+			if(url != null){
+				ret = display(isPlayback ? 1 : 0);
+			}else{
+				Log.e("", "url is null");
+			}
+			
+			if(!ret){
+				handler.sendEmptyMessage(LOGIN_FAIL);
+			}
+		}
+	}
+	
+	Handler handler = new Handler(){
+		public void handleMessage(android.os.Message msg) {
+			switch(msg.what){
+			case LOGIN_FAIL:
+				if(!isDestroyed()){
+					new AlertDialog.Builder(PlayerActivity.this)   
+			        .setTitle("登录失败")   
+			        .setMessage("连接失败，请重新连接")                 
+			        .setPositiveButton("确定", new OnClickListener() {
+						
+						@Override
+						public void onClick(DialogInterface arg0, int arg1) {
+							// TODO Auto-generated method stub
+							
+							PlayerActivity.this.finish();
+						}
+					})   
+			        .show();  
+				}
+				break;
+			case SHOW_INFO:
+				Toast.makeText(PlayerActivity.this, "url:"+url+",slot:"+slot, 1000).show();
+				break;
+			}
+		};
+	};
 	
 	private boolean init(){
 		Intent intent = getIntent();
@@ -147,6 +201,7 @@ public class PlayerActivity extends Activity implements Callback{
 	
 	private void getEventLinkage(){
 		try {
+			Log.e("", "getEventLinkage");
 			String deviceId = "";
 			EventLinkage eventLinkage = JsonUtils.parseEventLinkageJsonObject(new JSONObject(hp.linkage(webserviceIp, eventNotify.getId(), eventNotify.getEventType(), eventNotify.getEventState(),cookieHalf+"verifysession="+MD5.getMD5("GET:"+"/howell/ver10/data_service/management/System/Events/Linkages/Components/"+eventNotify.getId()+"/"+eventNotify.getEventType()+"/"+eventNotify.getEventState()+":"+verify))));
 			if(eventLinkage.getVideoPlaybackIdentifier() != null){
@@ -162,7 +217,7 @@ public class PlayerActivity extends Activity implements Callback{
 			url = device.getUri().split(":")[1].substring(2);
 			//url = "192.168.3.99";
 			Log.e("2", url);
-			
+			//handler.sendEmptyMessage(SHOW_INFO);
 			//int beg = eventLinkage.getVideoPlaybackIdentifier().get(0).getBeginTime();
 			//int end = eventLinkage.getVideoPlaybackIdentifier().get(0).getEndTime();
 		} catch (NoSuchAlgorithmException e) {

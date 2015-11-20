@@ -1,4 +1,5 @@
-obj/local/armeabi/objs/hwnet_jni/decode_jni.o: jni/decode_jni.c \
+/cygdrive/e/android/workspace/ForMuseum/obj/local/armeabi/objs/hwnet_jni/decode_jni.o: \
+ /cygdrive/e/android/workspace/ForMuseum/jni/decode_jni.c \
  /cygdrive/f/Android/android-ndk-r10/platforms/android-17/arch-arm/usr/include/jni.h \
  /cygdrive/f/Android/android-ndk-r10/platforms/android-17/arch-arm/usr/include/sys/cdefs.h \
  /cygdrive/f/Android/android-ndk-r10/platforms/android-17/arch-arm/usr/include/sys/cdefs_elf.h \
@@ -38,10 +39,13 @@ obj/local/armeabi/objs/hwnet_jni/decode_jni.o: jni/decode_jni.c \
  /cygdrive/f/Android/android-ndk-r10/platforms/android-17/arch-arm/usr/include/sched.h \
  /cygdrive/f/Android/android-ndk-r10/platforms/android-17/arch-arm/usr/include/android/log.h \
  /cygdrive/f/Android/android-ndk-r10/platforms/android-17/arch-arm/usr/include/stdio.h \
- jni/include/hwplay/stream_type.h jni/include/hwplay/play_def.h \
- jni/include/hwplay/hw_config.h jni/include/net_sdk.h \
- jni/include/net_err.h jni/include/protocol_type.h \
- jni/include/hw_config.h
+ /cygdrive/e/android/workspace/ForMuseum/jni/include/hwplay/stream_type.h \
+ /cygdrive/e/android/workspace/ForMuseum/jni/include/hwplay/play_def.h \
+ /cygdrive/e/android/workspace/ForMuseum/jni/include/hwplay/hw_config.h \
+ /cygdrive/e/android/workspace/ForMuseum/jni/include/net_sdk.h \
+ /cygdrive/e/android/workspace/ForMuseum/jni/include/net_err.h \
+ /cygdrive/e/android/workspace/ForMuseum/jni/include/protocol_type.h \
+ /cygdrive/e/android/workspace/ForMuseum/jni/include/hw_config.h
 
 /cygdrive/f/Android/android-ndk-r10/platforms/android-17/arch-arm/usr/include/jni.h:
 
@@ -121,16 +125,16 @@ obj/local/armeabi/objs/hwnet_jni/decode_jni.o: jni/decode_jni.c \
 
 /cygdrive/f/Android/android-ndk-r10/platforms/android-17/arch-arm/usr/include/stdio.h:
 
-jni/include/hwplay/stream_type.h:
+/cygdrive/e/android/workspace/ForMuseum/jni/include/hwplay/stream_type.h:
 
-jni/include/hwplay/play_def.h:
+/cygdrive/e/android/workspace/ForMuseum/jni/include/hwplay/play_def.h:
 
-jni/include/hwplay/hw_config.h:
+/cygdrive/e/android/workspace/ForMuseum/jni/include/hwplay/hw_config.h:
 
-jni/include/net_sdk.h:
+/cygdrive/e/android/workspace/ForMuseum/jni/include/net_sdk.h:
 
-jni/include/net_err.h:
+/cygdrive/e/android/workspace/ForMuseum/jni/include/net_err.h:
 
-jni/include/protocol_type.h:
+/cygdrive/e/android/workspace/ForMuseum/jni/include/protocol_type.h:
 
-jni/include/hw_config.h:
+/cygdrive/e/android/workspace/ForMuseum/jni/include/hw_config.h:

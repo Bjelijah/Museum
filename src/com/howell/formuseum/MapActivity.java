@@ -27,6 +27,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -48,6 +49,7 @@ import com.howell.utils.DialogUtils;
 import com.howell.utils.MD5;
 import com.howell.utils.PhoneConfigUtils;
 import com.howell.utils.ScaleImageUtils;
+import com.howell.utils.Utils;
 
 /**
  * @author 霍之昊 
@@ -127,7 +129,7 @@ public class MapActivity extends Activity implements OnClickListener{
 		verify = intent.getStringExtra("verify");
 		map = (Map) intent.getSerializableExtra("map");
 		mapName = (TextView)findViewById(R.id.tv_map_name);
-		mapName.setText(map.getName());
+		mapName.setText(Utils.utf8Togb2312(new String(Base64.decode(map.getName(),0))));
 		imgAlarm = (ImageView)findViewById(R.id.map_activity_img_alarm);
 		//mTalk = (LinearLayout)findViewById(R.id.ll_map_talk);
 		//mTalk.setOnClickListener(this);

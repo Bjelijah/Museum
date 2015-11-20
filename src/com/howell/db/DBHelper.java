@@ -33,7 +33,9 @@ public class DBHelper extends SQLiteOpenHelper {
 				",mapName VARCHAR" +
 				",comment VARCHAR" +
 				",mapFormat VARCHAR " +
-				",mapDataPath VARCHAR)");
+				",mapDataPath VARCHAR" +
+				",MD5Code VARCHAR" +
+				",lastModificationTime VARCHAR)");
 		
 		//isAlarmed 0:false 1:true
 		db.execSQL("CREATE TABLE IF NOT EXISTS alarm_list" +
