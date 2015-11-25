@@ -80,6 +80,7 @@ public class MapActivity extends Activity implements OnClickListener{
 	private static final int alarmPointHeight = 72;	//闪烁图标高
 	
 	private static final int ADD_VIEW = 1;
+	private static final int UPDATE_ALARM = 2;
 	
 	private Dialog waitDialog;
 	private boolean isBroadcastReceiverRegister;
@@ -92,7 +93,9 @@ public class MapActivity extends Activity implements OnClickListener{
 		init();
 		setMapBackground();
 		calculateLayout();
-		addMapItem();
+		//addMapItem();
+		AddMapItem thread = new AddMapItem();
+		thread.start();
 	}
 	
 	@Override
@@ -150,7 +153,7 @@ public class MapActivity extends Activity implements OnClickListener{
 			public boolean onPreDraw() { 
 				int width = layout.getMeasuredHeight(); 
 				int height = layout.getMeasuredWidth(); 
-				Log.e("", "layout height:"+height+", layout width:"+width);
+//				Log.e("", "layout height:"+height+", layout width:"+width);
 				if(width > height){
 					parentLayoutWidth = height;
 					parentLayoutHeight = width;
@@ -209,7 +212,7 @@ public class MapActivity extends Activity implements OnClickListener{
 		}
 	}
 	
-	private void addMapItem(){
+	/*private void addMapItem(){
 		new AsyncTask<Void, Integer, Void>(){
 
 			@Override
@@ -236,6 +239,26 @@ public class MapActivity extends Activity implements OnClickListener{
 				
 			};
 		}.execute();
+	}*/
+	
+	class AddMapItem extends Thread{
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			super.run();
+			//等待计算出layout大小
+			while(parentLayoutWidth == 0 && parentLayoutHeight ==0){
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			//设置地图子模块
+			createChildren();
+			handler.sendEmptyMessage(UPDATE_ALARM);
+		}
 	}
 	
 	private void registerReceiver(){
@@ -249,15 +272,31 @@ public class MapActivity extends Activity implements OnClickListener{
 	
 	public void updateAlarm(){
 		alarmList = null;
-		alarmList = mgr.queryAlarmListWithMapId(map.getId());
+		alarmList = mgr.queryAllAlarmListWithMapId(map.getId());
 		for(Entry<ImageView, AlarmThread> entry : item.entrySet()){
 			for(EventNotify e : alarmList){
-				if(entry.getKey().getTag().equals(e.getId()) && entry.getValue() == null){
-					//设置闪烁图片为可点击
-					entry.getKey().setClickable(true);
-					//报警线程启动
-					item.put(entry.getKey(), new AlarmThread(entry.getKey()));
-					entry.getValue().start();
+				if(entry.getKey().getTag().equals(e.getId())){
+					if(e.getIsAlarmed() == 0  && entry.getValue() == null){
+						//设置闪烁图片为可点击
+						entry.getKey().setClickable(true);
+						//报警线程启动
+						item.put(entry.getKey(), new AlarmThread(entry.getKey()));
+						entry.getValue().start();
+					}else if(e.getIsAlarmed() == 1  && entry.getValue() != null){
+						try {
+							//报警闪烁图片设置不可点击
+							entry.getKey().setClickable(false);
+							//闪烁线程标志位置true（关闭线程）
+							entry.getValue().setStopAlarming(true);
+							//回收线程资源
+							entry.getValue().join();
+							//闪烁线程置null
+							item.put(entry.getKey(), null);
+						} catch (InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
 				}
 			}
 		}
@@ -337,7 +376,12 @@ public class MapActivity extends Activity implements OnClickListener{
 //				item.put(iv, new AlarmThread(iv));
 				item.put(iv, null);
 				break;
-
+			case UPDATE_ALARM:
+				if(!MapActivity.this.isDestroyed()){
+					registerReceiver();
+					updateAlarm();
+				}
+				break;
 			default:
 				break;
 			}
@@ -404,7 +448,7 @@ public class MapActivity extends Activity implements OnClickListener{
 	public class MsgReceiver extends BroadcastReceiver{  
 		@Override  
 		public void onReceive(Context context, Intent intent) {  
-			System.out.println("收到广播！！！");
+			System.out.println("MapActivity收到广播！！！");
 			//ret:0 登录失败 1 登录成功 2 有报警  -2 其它
 			int ret = intent.getIntExtra("ret", -2); 
 			System.out.println("login ret :"+ret);

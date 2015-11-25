@@ -395,7 +395,7 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 	public class MsgReceiver extends BroadcastReceiver{  
 		@Override  
 		public void onReceive(Context context, Intent intent) {  
-			System.out.println("收到广播！！！");
+			System.out.println("MapListActivity收到广播！！！");
 			//ret:0 登录失败 1 登录成功 2 有报警  -2 其它
 			int ret = intent.getIntExtra("ret", -2); 
 			System.out.println("login ret :"+ret);

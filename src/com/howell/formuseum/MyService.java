@@ -48,40 +48,47 @@ public class MyService extends Service{
 		Log.e("alarmStreamFun",eventNotify.toString());
     	String componentId = eventNotify.getId();
     	String name = eventNotify.getName();
-//    	String eventState = ((EventNotifyRes) res).getEventNotify().getEventState();
+    	String eventState = ((EventNotifyRes) res).getEventNotify().getEventState();
+    	
+    	//设置内存里设备的id(notification id)号
+    	int temp_id = mgr.selectEventNotifySqlKey(eventNotify);
+    	
     	//isAlarmed 0：未查看警报 1：已查看警报
-    	if(!mgr.containsEventNotify(eventNotify)){
-    		mgr.addAlarmList(eventNotify);
-		}else{
-			eventNotify.setIsAlarmed(0);
-			mgr.updateEventNotifyAlarmFlag(eventNotify);
-		}
-		
-		//设置内存里设备的id(notification id)号
-		int temp_id = mgr.selectEventNotifySqlKey(eventNotify);
-			
+    	if(eventState.equals("Active")){
+    		Log.e("alarmStreamFun", "State is Active");
+    		if(!mgr.containsEventNotify(eventNotify)){
+        		mgr.addAlarmList(eventNotify);
+    		}else{
+    			eventNotify.setIsAlarmed(0);
+    		}
+    		// ② 初始化Notification  
+    	    int icon = R.drawable.logo;  
+    	    CharSequence tickerText = "入侵警报";  
+    	    long when = System.currentTimeMillis();  
+    	    mNotification = new Notification(icon,tickerText,when);  
+    	    mNotification.flags = Notification.FLAG_AUTO_CANCEL;  
+    	    mNotification.defaults = Notification.DEFAULT_VIBRATE| Notification.DEFAULT_SOUND;
+    	    // ③ 定义notification的消息 和 PendingIntent  
+    	    Context context = this;  
+    	    CharSequence contentTitle = name + "入侵警报";  
+    	    CharSequence contentText = name + "入侵警报";  
+    	    Intent notificationIntent = new Intent(this,LogoActivity.class);
+    	    notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    	    PendingIntent contentIntent = PendingIntent.getActivity(context, temp_id, notificationIntent,PendingIntent.FLAG_UPDATE_CURRENT );  
+    	    mNotification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);  
+    	    mNotificationManager.notify(temp_id,mNotification);  
+    	}else{
+    		Log.e("alarmStreamFun", "State is Inactive");
+    		eventNotify.setIsAlarmed(1);
+    		mNotificationManager.cancel(mgr.selectEventNotifySqlKey(eventNotify));
+    	}
+    	mgr.updateEventNotifyAlarmFlag(eventNotify);
+    	Log.e("alarmStreamFun2",eventNotify.toString());
 		//发送Action为com.howell.formuseum.RECEIVER的广播  
 		my_intent.putExtra("ret", 2); 
 		my_intent.putExtra("alarmCamera", eventNotify);
 	    sendBroadcast(my_intent);  
 	        
-	    // ② 初始化Notification  
-	    int icon = R.drawable.logo;  
-	    CharSequence tickerText = "入侵警报";  
-	    long when = System.currentTimeMillis();  
-	    mNotification = new Notification(icon,tickerText,when);  
-	    mNotification.flags = Notification.FLAG_AUTO_CANCEL;  
-	    mNotification.defaults = Notification.DEFAULT_VIBRATE| Notification.DEFAULT_SOUND;
-			
-	    // ③ 定义notification的消息 和 PendingIntent  
-	    Context context = this;  
-	    CharSequence contentTitle = name + "入侵警报";  
-	    CharSequence contentText = name + "入侵警报";  
-	    Intent notificationIntent = new Intent(this,LogoActivity.class);
-	    notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-	    PendingIntent contentIntent = PendingIntent.getActivity(context, temp_id, notificationIntent,PendingIntent.FLAG_UPDATE_CURRENT );  
-	    mNotification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);  
-	    mNotificationManager.notify(temp_id,mNotification);  
 	}
 	
 	private void start(final String websocket_ip,final String session) {
@@ -107,7 +114,7 @@ public class MyService extends Service{
 						@Override
 						public void run() {
 							// TODO Auto-generated method stub
-							//发送心跳给服务器3分钟1次
+							//发送心跳给服务器1分钟1次
 							mConnection.sendTextMessage(WebSocketProtocolUtils.createKeepAliveJSONObject(mCseqManager.getCseq(),systemUpTimeUtil.getSystemUpTime()).toString());
 						}
 					} , 60 * 1000 , 60 * 1000);
@@ -125,9 +132,9 @@ public class MyService extends Service{
 //								alarmStreamFun(((EventNotifyRes) res).getEventNotify().getId(),1,Utils.parseUrl(((EventNotifyRes) res).getEventNotify().getImageUrl()),((EventNotifyRes) res).getEventNotify().getName()
 //										,((EventNotifyRes) res).getEventNotify().getDateYear(),((EventNotifyRes) res).getEventNotify().getDateMonth(),((EventNotifyRes) res).getEventNotify().getDateDay()
 //										,((EventNotifyRes) res).getEventNotify().getDateHour(),((EventNotifyRes) res).getEventNotify().getDateMin(),((EventNotifyRes) res).getEventNotify().getDateSec());
-								if(((EventNotifyRes) res).getEventNotify().getEventState().equals("Active")){
+								//if(((EventNotifyRes) res).getEventNotify().getEventState().equals("Active")){
 									alarmStreamFun((EventNotifyRes)res);
-								}
+								//}
 								
 								mConnection.sendTextMessage(WebSocketProtocolUtils.createADCResJSONObject(((EventNotifyRes) res).getcSeq()).toString());
 							}else if(res instanceof KeepAliveRes){
