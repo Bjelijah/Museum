@@ -108,5 +108,12 @@
 	            android:text="@string/login" />
 
     	</LinearLayout>
+
+        <Button
+            android:id="@+id/button1_login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Button" />
+
     </LinearLayout>
 </LinearLayout>

@@ -6,6 +6,7 @@ import com.howell.protocol.entity.Coordinate;
 import com.howell.protocol.entity.EventNotify;
 import com.howell.protocol.entity.Map;
 import com.howell.protocol.entity.MapItem;
+import com.howell.utils.DebugUtil;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -14,6 +15,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 public class DBManager {
+	private static final String TAG = "DBManager";
 	private DBHelper helper;
 	private SQLiteDatabase db;
 	
@@ -29,6 +31,10 @@ public class DBManager {
 	 * @param camera
 	 */
 	public synchronized void addMapItem(MapItem item) {
+		if (db == null) {
+			DebugUtil.logE(TAG, "add map item error db = null");
+			return;
+		}
         db.beginTransaction();	//开始事务
         try {
         	db.execSQL("INSERT INTO map_item VALUES(NULL,?, ?, ?, ? , ? , ? , ?)", new Object[]{item.getId(),item.getComponentId(),item.getMapId(),item.getCoordinate().getX(),item.getCoordinate().getY()
@@ -40,6 +46,10 @@ public class DBManager {
 	}
 	
 	public synchronized void addMap(Map map) {
+		if (db == null) {
+			DebugUtil.logE(TAG, "add map error db = null");
+			return;
+		}
         db.beginTransaction();	//开始事务
         try {
         	db.execSQL("INSERT INTO map VALUES(NULL,?, ?, ?, ? , ? , ? , ? )", new Object[]{map.getId(),map.getName(),map.getComment(),map.getMapFormat(),map.getDataPath(),map.getMD5Code(),map.getLastModificationTime()});
@@ -50,6 +60,10 @@ public class DBManager {
 	}
 	
 	public synchronized void addAlarmList(EventNotify eventNotify) {
+		if (db == null) {
+			DebugUtil.logE(TAG, "add alarm list error db = null");
+			return;
+		}
         db.beginTransaction();	//开始事务
         try {
         	String mapId = "";
@@ -83,6 +97,10 @@ public class DBManager {
 	 * @param camera
 	 */
 	public synchronized void deleteTable(String tableName) {
+		if(db == null){
+			DebugUtil.logE(TAG, "deleteTable error  db = null");
+			return;
+		}
 		db.execSQL("delete from "+ tableName);
 	}
 	
@@ -291,10 +309,13 @@ public class DBManager {
 		Cursor c = queryTheCursor("alarm_list");
 		while (c.moveToNext()) {
 			if((c.getInt(c.getColumnIndex("isAlarmed")) == 0) && c.getString(c.getColumnIndex("mapId")).equals(mapId)){
+				c.close();
+				Log.e("123", "has alarm with map id true");
 				return true;
 			}
 		}
 		c.close();
+		Log.e("123","has alarm with map id false");
 		return false;
 	}
 	
@@ -330,6 +351,10 @@ public class DBManager {
 	 * @return	Cursor
 	 */
 	public synchronized Cursor queryTheCursor(String tableName) {
+		if (db==null) {
+			DebugUtil.logE(TAG, "queryTheCursor   db = null ");
+			return null;
+		}
         Cursor c = db.rawQuery("SELECT * FROM " + tableName, null);
         return c;
 	}
@@ -338,6 +363,9 @@ public class DBManager {
 	 * close database
 	 */
 	public synchronized void closeDB() {
+		
+		DebugUtil.logI(TAG, "close DB");
 		db.close();
+		db = null;
 	}
 }

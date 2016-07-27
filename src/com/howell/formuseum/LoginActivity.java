@@ -17,21 +17,26 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.howell.formusemu.action.AudioAction;
+import com.howell.formusemu.action.LoginAction;
 import com.howell.protocol.HttpProtocol;
 import com.howell.protocol.entity.ClientCredential;
 import com.howell.protocol.entity.Fault;
 import com.howell.protocol.entity.ServerNonce;
 import com.howell.utils.CacheUtils;
+import com.howell.utils.DebugUtil;
 import com.howell.utils.DialogUtils;
 import com.howell.utils.JsonUtils;
 import com.howell.utils.MD5;
 import com.howell.utils.SharedPreferencesUtils;
 import com.howell.utils.TalkManager;
+import com.howell.utils.Utils;
 
 public class LoginActivity extends Activity implements OnClickListener{
 	
@@ -48,12 +53,26 @@ public class LoginActivity extends Activity implements OnClickListener{
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.login_activity);
+		Log.i("123", "loginActivity   oncreate");
 		init();
+		Button button = (Button) findViewById(R.id.button1_login);
+		button.setVisibility(View.GONE);
+		button.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				AudioAction.getInstance().initAudio();
+				AudioAction.getInstance().audioPlay();
+				talkManager.getInstance().start(LoginActivity.this);
+				Intent intent = new Intent(LoginActivity.this,TalkActivity.class);
+				LoginActivity.this.startActivity(intent);
+			}
+		});
 	}
 	
 	@Override
 	protected void onDestroy() {
-		// TODO Auto-generated method stub
 		super.onDestroy();
 		if(talkingDebug){
 			talkManager.audioStop();
@@ -64,13 +83,16 @@ public class LoginActivity extends Activity implements OnClickListener{
 	//192.168.128.253
 	//18.149
 	private void init(){
-		talkingDebug = false;
+		/*
+		 * talk 初始化  移至 mapListActivity 
+		 */
+		talkingDebug = false;//FIXME unused
 		CacheUtils.createBitmapDir();
 		if(talkingDebug){
 			talkManager = TalkManager.getInstance();
 			talkManager.test();
 		}
-		jni = new JNIManager();
+		jni = JNIManager.getInstance();
 		mAccount = (EditText)findViewById(R.id.et_login_account);
 		mPassword = (EditText)findViewById(R.id.et_login_password);
 		mWebserviceIp = (EditText)findViewById(R.id.et_login_webserviceip);
@@ -83,6 +105,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		String account = sharedPreferences.getString("account", "");
 	    String password = sharedPreferences.getString("password", "");
 	    String websocket_ip = sharedPreferences.getString("webserviceIp", "192.168.18.245");
+	
 	    //String talk_ip = sharedPreferences.getString("talkIp", "192.168.18.104");
 	    mAccount.setText(account);
 	    mPassword.setText(password);
@@ -98,8 +121,13 @@ public class LoginActivity extends Activity implements OnClickListener{
 	}
 
 	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		DebugUtil.logI("onOptionsItemSelected", this.getClass());
+		return super.onOptionsItemSelected(item);
+	}
+	
+	@Override
 	public void onClick(View v) {
-		// TODO Auto-generated method stub
 		switch (v.getId()) {
 		case R.id.btn_login:
 			String account = mAccount.getText().toString();
@@ -169,9 +197,9 @@ public class LoginActivity extends Activity implements OnClickListener{
 
 		@Override
 		protected Void doInBackground(Void... arg0) {
-			// TODO Auto-generated method stub
 			try {
 				//获取session
+				
 				ServerNonce sn= JsonUtils.parseNonceJsonObject(new JSONObject(hp.nonce(webserviceIp,account)));
 				if(sn != null){
 					String clientNonce = createClientNonce(32);
@@ -188,17 +216,16 @@ public class LoginActivity extends Activity implements OnClickListener{
 				if(talkingDebug){
 				//连接语音对讲
 				//jni.register2service(fault.getId(),"",account, talkIp , (short)5500);
-					talkManager.registerService(fault.getId(),"",account, talkIp , (short)5500);
+					Log.i("123", "register service");
+//					talkManager.registerService(fault.getId(),"",account, talkIp , (short)5500);//guid //mac
+			
 				}
 				
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (NoSuchAlgorithmException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
@@ -207,22 +234,26 @@ public class LoginActivity extends Activity implements OnClickListener{
 		
 		@Override
 		protected void onPostExecute(Void result) {
-			// TODO Auto-generated method stub
 			super.onPostExecute(result);
 			finishWaitingAnimation();
 			if(fault != null && fault.getId() != null){
 				SharedPreferencesUtils.saveLoginInfo(LoginActivity.this, account, password, webserviceIp);
 				
+				String uuid = Utils.getPhoneUid(LoginActivity.this);
+				String mac  = Utils.getPhoneMac(LoginActivity.this);
+				
+				LoginAction.getInstance().setName(account).setPwd(password).setWebserviceIp(webserviceIp)
+				.setUuid(uuid).setMac(mac)
+				.saveTalkInfo(LoginActivity.this);
 				Intent intent = new Intent(LoginActivity.this,MapListActivity.class);
 				intent.putExtra("session", fault.getId());
 				intent.putExtra("cookieHalf", cookieHalf);
+				intent.putExtra("account", account);
 				try {
 					intent.putExtra("verify", MD5.getMD5(password2));
 				} catch (NoSuchAlgorithmException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (UnsupportedEncodingException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				intent.putExtra("webserviceIp", webserviceIp);

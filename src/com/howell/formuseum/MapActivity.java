@@ -20,6 +20,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ConfigurationInfo;
+import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -29,6 +31,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
@@ -40,6 +44,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.howell.db.DBManager;
+import com.howell.formusemu.action.AlarmHistoryAction;
 import com.howell.protocol.HttpProtocol;
 import com.howell.protocol.entity.EventNotify;
 import com.howell.protocol.entity.Map;
@@ -57,11 +62,12 @@ import com.howell.utils.Utils;
  * 类说明
  */
 public class MapActivity extends Activity implements OnClickListener{
+
 	private TextView mapName;
 	private Map map;
 	private FrameLayout layout;
 	private ImageView imgAlarm;
-	//private LinearLayout mTalk;
+	private LinearLayout mTalk;
 	private LayoutParams wrapContentParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 	
 	private DBManager mgr;		//数据库操作类
@@ -86,10 +92,81 @@ public class MapActivity extends Activity implements OnClickListener{
 	private boolean isBroadcastReceiverRegister;
 	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	public void onConfigurationChanged(Configuration newConfig) {
 		// TODO Auto-generated method stub
+		super.onConfigurationChanged(newConfig);
+		Log.i("123", "onConfigurationChanged      ");
+		if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE){
+			Log.i("123", "横屏");
+			//setContentView(R.layout.map);
+		
+		}else{
+			
+			Log.i("123", "竖屏");
+		
+		//	setContentView(R.layout.logo);
+			//setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+		}		
+	}
+	
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		Log.i("123", "map on pause");
+		
+		super.onPause();
+	}
+	
+	@Override
+	protected void onRestart() {
+		// TODO Auto-generated method stub
+		Log.i("123", "map restart");
+		
+		
+		super.onRestart();
+	}
+	
+	@Override
+	protected void onStart() {
+		// TODO Auto-generated method stub
+		Log.i("123", "map onstart");
+		super.onStart();
+	}
+	
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+//		try {
+//			Thread.sleep(5000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		Log.i("123", "map on resume");
+	//	setContentView(R.layout.map);
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+		
+		
+		int rotatin = this.getWindowManager().getDefaultDisplay().getRotation();
+		
+		
+		
+		Log.i("123", "rotatin="+rotatin);
+		
+		
+		
+		super.onResume();
+	}
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+			
+		Log.i("123", "map on create");
+		
+		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map);
+		
 		init();
 		setMapBackground();
 		calculateLayout();
@@ -100,7 +177,6 @@ public class MapActivity extends Activity implements OnClickListener{
 	
 	@Override
 	protected void onDestroy() {
-		// TODO Auto-generated method stub
 		super.onDestroy();
 		if(mgr != null){
 			mgr.closeDB();
@@ -122,6 +198,42 @@ public class MapActivity extends Activity implements OnClickListener{
 		}
 	}
 	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		menu.add(0, 0, Menu.NONE, "历史报警");
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case 0:
+			try {
+				AlarmHistoryAction.getInstance()
+				.setWebServiceIP(webserviceIp)
+				.setCookie(cookieHalf+"verifysession="+MD5.getMD5("GET:"+"/howell/ver10/data_service/Business/Informations/Event/Records:"+verify))
+				.setSession(session)
+				.setCookieHalf(cookieHalf)
+				.setVerify(verify);
+			} catch (NoSuchAlgorithmException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			Intent intent = new Intent(this,AlarmHistoryListActivity.class);
+			startActivity(intent);
+			break;
+
+		default:
+			break;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+	
+	
+	
 	private void init(){
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		Intent intent = getIntent();
@@ -133,9 +245,11 @@ public class MapActivity extends Activity implements OnClickListener{
 		map = (Map) intent.getSerializableExtra("map");
 		mapName = (TextView)findViewById(R.id.tv_map_name);
 		mapName.setText(Utils.utf8Togb2312(new String(Base64.decode(map.getName(),0))));
+//		mapName.setText(new String(Base64.decode(map.getName(),0)));
 		imgAlarm = (ImageView)findViewById(R.id.map_activity_img_alarm);
-		//mTalk = (LinearLayout)findViewById(R.id.ll_map_talk);
-		//mTalk.setOnClickListener(this);
+		mTalk = (LinearLayout)findViewById(R.id.ll_map_talk);
+		mTalk.setOnClickListener(this);
+		mTalk.setVisibility(View.VISIBLE);//FIXME
 		item = new HashMap<ImageView, MapActivity.AlarmThread>();
 		hp = new HttpProtocol();
 		layout = (FrameLayout)findViewById(R.id.fl_map);
@@ -167,7 +281,7 @@ public class MapActivity extends Activity implements OnClickListener{
 		}); 
 	}
 	
-	@SuppressLint("ShowToast")
+	@SuppressLint({ "ShowToast", "NewApi" })
 	@SuppressWarnings("deprecation")
 	private void setMapBackground(){
 		//判断文件夹里是否存在地图文件，不存在则从平台获取
@@ -182,20 +296,16 @@ public class MapActivity extends Activity implements OnClickListener{
 				Drawable drawable = null;
 				@Override
 				protected Void doInBackground(Void... arg0) {
-					// TODO Auto-generated method stub
 					try {
 						byte[] data = hp.mapsData(webserviceIp, map.getId(), cookieHalf+"verifysession="+MD5.getMD5("GET:"+"/howell/ver10/data_service/management/System/Maps/"+map.getId()+"/Data:"+verify));
 						//存于文件中
 						CacheUtils.saveBmpToSd(ScaleImageUtils.decodeByteArray(PhoneConfigUtils.getPhoneWidth(MapActivity.this), PhoneConfigUtils.getPhoneHeight(MapActivity.this), data), map.getId());
 						drawable = new BitmapDrawable(BitmapFactory.decodeFile(map.getDataPath()));
 					} catch (NoSuchAlgorithmException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (UnsupportedEncodingException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (JSONException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					return null;
@@ -203,7 +313,6 @@ public class MapActivity extends Activity implements OnClickListener{
 						
 				@Override
 				protected void onPostExecute(Void result) {
-					// TODO Auto-generated method stub
 					super.onPostExecute(result);
 					waitDialog.dismiss();
 					layout.setBackground(drawable);
@@ -217,13 +326,11 @@ public class MapActivity extends Activity implements OnClickListener{
 
 			@Override
 			protected Void doInBackground(Void... arg0) {
-				// TODO Auto-generated method stub
 				//等待计算出layout大小
 				while(parentLayoutWidth == 0 && parentLayoutHeight ==0){
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -244,14 +351,12 @@ public class MapActivity extends Activity implements OnClickListener{
 	class AddMapItem extends Thread{
 		@Override
 		public void run() {
-			// TODO Auto-generated method stub
 			super.run();
 			//等待计算出layout大小
 			while(parentLayoutWidth == 0 && parentLayoutHeight ==0){
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -293,7 +398,6 @@ public class MapActivity extends Activity implements OnClickListener{
 							//闪烁线程置null
 							item.put(entry.getKey(), null);
 						} catch (InterruptedException e1) {
-							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
 					}
@@ -309,7 +413,6 @@ public class MapActivity extends Activity implements OnClickListener{
         try {
 			BitmapFactory.decodeStream(new FileInputStream(f), null, o);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}  
         int width_tmp = o.outWidth, height_tmp = o.outHeight;  
@@ -365,9 +468,9 @@ public class MapActivity extends Activity implements OnClickListener{
 	
 	@SuppressLint("HandlerLeak")
 	Handler handler = new Handler(){
+		@SuppressLint("NewApi")
 		@Override
 		public void handleMessage(Message msg) {
-			// TODO Auto-generated method stub
 			super.handleMessage(msg);
 			switch (msg.what) {
 			case ADD_VIEW:
@@ -390,12 +493,11 @@ public class MapActivity extends Activity implements OnClickListener{
 
 	@Override
 	public void onClick(View view) {
-		// TODO Auto-generated method stub
 		switch (view.getId()) {
-//		case R.id.ll_map_talk:
-//			Intent intent = new Intent(this,TalkActivity.class);
-//			startActivity(intent);
-//			break;
+		case R.id.ll_map_talk:
+			Intent talkIntent = new Intent(this,TalkActivity.class);
+			startActivity(talkIntent);
+			break;
 
 		default:
 			//点击报警闪烁图标
@@ -411,7 +513,6 @@ public class MapActivity extends Activity implements OnClickListener{
 						//闪烁线程置null
 						item.put(entry.getKey(), null);
 					} catch (InterruptedException e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 					Intent intent = new Intent(this,AlarmDetailActivity.class);
@@ -484,7 +585,6 @@ public class MapActivity extends Activity implements OnClickListener{
 	
 		@Override
 		public void run() {
-			// TODO Auto-generated method stub
 			super.run();
 			while(!isStopAlarming){
 				Message msg = new Message();
@@ -499,7 +599,6 @@ public class MapActivity extends Activity implements OnClickListener{
 					handler.sendMessage(msg);
 					Thread.sleep(300);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -510,7 +609,6 @@ public class MapActivity extends Activity implements OnClickListener{
 		Handler handler = new Handler(){
 			@Override
 			public void handleMessage(Message msg) {
-				// TODO Auto-generated method stub
 				super.handleMessage(msg);
 				switch (msg.what) {
 				case SETIMGVISIBLE:

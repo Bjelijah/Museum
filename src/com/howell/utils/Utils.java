@@ -1,36 +1,53 @@
 package com.howell.utils;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.Character.UnicodeBlock;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
+import java.util.UUID;
+
+import org.codehaus.jackson.map.util.ISO8601DateFormat;
+import org.codehaus.jackson.map.util.ISO8601Utils;
 
 import com.howell.db.Camera;
 
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.provider.ContactsContract.Contacts.Data;
+import android.provider.Settings.Secure;
+import android.telephony.TelephonyManager;
+import android.text.format.Formatter;
+import android.util.Log;
 import android.widget.Toast;
 
 @SuppressWarnings("deprecation")
 @SuppressLint("SimpleDateFormat")
 public class Utils {
-	
+
 	public static Date StringToDate(String string){
-	   	 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-	   	 Date date = null;
-			 try {
-				date = sdf.parse(string);
-			 } catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			 }
-	   	 return date;
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+		Date date = null;
+		try {
+			date = sdf.parse(string);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return date;
 	}
-	
+
 	public static int[] getFiveSecondsBeforeDate(Camera c){
 		Date date = new Date(c.alarm_date_year-1900,c.alarm_date_month-1,c.alarm_date_day,c.alarm_date_hour,c.alarm_date_minute,c.alarm_date_second);
 		SimpleDateFormat dft = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
@@ -46,7 +63,7 @@ public class Utils {
 		}
 		return fiveSecondsBeforeDate;
 	}
-	
+
 	public static int[] getTwoSecondsAfterDate(Camera c){
 		Date date = new Date(c.alarm_date_year-1900,c.alarm_date_month-1,c.alarm_date_day,c.alarm_date_hour,c.alarm_date_minute,c.alarm_date_second);
 		SimpleDateFormat dft = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
@@ -62,9 +79,13 @@ public class Utils {
 		}
 		return twoSecondsAfterDate;
 	}
-	
+
 	public static short[] getFiveSecondsBeforeDate(Date date){
 		//Date date = new Date(c.alarm_date_year-1900,c.alarm_date_month-1,c.alarm_date_day,c.alarm_date_hour,c.alarm_date_minute,c.alarm_date_second);
+		if (date==null) {
+			DebugUtil.logE(null, "get five seconds before date = null");
+		}
+
 		SimpleDateFormat dft = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);
@@ -78,7 +99,7 @@ public class Utils {
 		}
 		return fiveSecondsBeforeDate;
 	}
-	
+
 	public static short[] getTwoSecondsAfterDate(Date date){
 		//Date date = new Date(c.alarm_date_year-1900,c.alarm_date_month-1,c.alarm_date_day,c.alarm_date_hour,c.alarm_date_minute,c.alarm_date_second);
 		SimpleDateFormat dft = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
@@ -94,7 +115,7 @@ public class Utils {
 		}
 		return twoSecondsAfterDate;
 	}
-	
+
 	public static long getMilliseconds(Camera before,Camera now){
 		Date beforeDate = new Date(before.alarm_date_year-1900,before.alarm_date_month-1,before.alarm_date_day
 				,before.alarm_date_hour,before.alarm_date_minute,before.alarm_date_second);
@@ -108,17 +129,17 @@ public class Utils {
 		long nowLDate = nowCal.getTimeInMillis();
 		return nowLDate - beforeLDate;
 	}
-	
+
 	/**
-	  * utf-8 转换成 unicode
-	  * @author fanhui
-	  * 2007-3-15
-	  * @param inStr
-	  * @return
-	  */
+	 * utf-8 转换成 unicode
+	 * @author fanhui
+	 * 2007-3-15
+	 * @param inStr
+	 * @return
+	 */
 	public static String utf8ToUnicode(String inStr) {
 		char[] myBuffer = inStr.toCharArray();
-			        
+
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < inStr.length(); i++) {
 			UnicodeBlock ub = UnicodeBlock.of(myBuffer[i]);
@@ -139,81 +160,81 @@ public class Utils {
 		}
 		return sb.toString();
 	}
-	
+
 	//UTF-8->GB2312  
-    public static String utf8Togb2312(String str){   
-  
-        StringBuffer sb = new StringBuffer();   
-  
-        for ( int i=0; i<str.length(); i++) {   
-  
-            char c = str.charAt(i);   
-            switch (c) {   
-               case '+' :   
-                   sb.append( ' ' );   
-               break ;   
-               case '%' :   
-                   try {   
-                        sb.append(( char )Integer.parseInt (   
-                        str.substring(i+1,i+3),16));   
-                   }   
-                   catch (NumberFormatException e) {   
-                       throw new IllegalArgumentException();   
-                  }   
-  
-                  i += 2;   
-  
-                  break ;   
-                    
-               default :   
-  
-                  sb.append(c);   
-  
-                  break ;   
-  
-             }   
-  
-        }   
-  
-        String result = sb.toString();   
-  
-        String res= null ;   
-  
-        try {   
-  
-             byte [] inputBytes = result.getBytes( "8859_1" );   
-  
-            res= new String(inputBytes, "UTF-8" );   
-  
-        }   
-  
-        catch (Exception e){}   
-  
-        return res;   
-  
-  }  
+	public static String utf8Togb2312(String str){   
+
+		StringBuffer sb = new StringBuffer();   
+
+		for ( int i=0; i<str.length(); i++) {   
+
+			char c = str.charAt(i);   
+			switch (c) {   
+			case '+' :   
+				sb.append( ' ' );   
+				break ;   
+			case '%' :   
+				try {   
+					sb.append(( char )Integer.parseInt (   
+							str.substring(i+1,i+3),16));   
+				}   
+				catch (NumberFormatException e) {   
+					throw new IllegalArgumentException();   
+				}   
+
+				i += 2;   
+
+				break ;   
+
+			default :   
+
+				sb.append(c);   
+
+				break ;   
+
+			}   
+
+		}   
+
+		String result = sb.toString();   
+
+		String res= null ;   
+
+		try {   
+
+			byte [] inputBytes = result.getBytes( "8859_1" );   
+
+			res= new String(inputBytes, "UTF-8" );   
+
+		}   
+
+		catch (Exception e){}   
+
+		return res;   
+
+	}  
 	public static void postAlerDialog(Context context,String message){
 		new AlertDialog.Builder(context)   
-//        .setTitle("�û�����������")   
-        .setMessage(message)                 
-        .setPositiveButton("确定", null)   
-        .show();  
+		//        .setTitle("�û�����������")   
+		.setMessage(message)                 
+		.setPositiveButton("确定", null)   
+		.show();  
 	}
-	
+
 	public static String host2ip(String host){
 		java.net.InetAddress x;
 		String ip = null;
-        try {
-                x = java.net.InetAddress.getByName(host);
-                ip = x.getHostAddress();//得到字符串形式的ip地址
-                System.out.println(ip);
-        } catch (UnknownHostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-        } 
-        return ip;
+		try {
+			x = java.net.InetAddress.getByName(host);
+			ip = x.getHostAddress();//得到字符串形式的ip地址
+			System.out.println(ip);
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		return ip;
 	}
-	
+
 	public static String getCharacterAndNumber() {
 		String rel="";
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -221,21 +242,21 @@ public class Utils {
 		rel = formatter.format(curDate);
 		return rel;
 	}
-	
+
 	public static String getFileName() {
 		// mu
 		//String fileNameRandom = getCharacterAndNumber(8);
 		String fileNameRandom = getCharacterAndNumber();
 		return fileNameRandom;
 	}
-	
+
 	public static void postToast(Context context,String message,int time){
-//		Toast toast= Toast.makeText(context, message, 1000);
-//		toast.setGravity(Gravity.CENTER, 0, 0);
-//		toast.show();
+		//		Toast toast= Toast.makeText(context, message, 1000);
+		//		toast.setGravity(Gravity.CENTER, 0, 0);
+		//		toast.show();
 		Toast.makeText(context, message, time).show();
 	}
-	
+
 	//ImageUrl:["http:\/\/192.168.1.1\/1.jpg"]
 	public static String parseUrl(String url){
 		if(url.equals("")){
@@ -247,34 +268,143 @@ public class Utils {
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < strarray.length; i++){
 			sb.append(strarray[i]);
-//			if(i != strarray.length - 1){
-//				sb.append("/");
-//			}
+			//			if(i != strarray.length - 1){
+			//				sb.append("/");
+			//			}
 			System.out.println("aaaaaaa:"+sb);
 		}
-//		System.out.println(sb);
+		//		System.out.println(sb);
 		System.out.println(strarray[2]);
 		System.out.println("ttttttttt:"+strarray[2].substring(0, strarray[2].length() - 1));
 		return strarray[2].substring(0, strarray[2].length() - 1);
 	}
-	
+
 	@SuppressLint("SimpleDateFormat")
 	public static String utc2TimeZone(String string){
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-	   	Date dateTemp = null;
-	   	try {
+		Date dateTemp = null;
+		try {
 			dateTemp = sdf.parse(string);
-	   	} catch (ParseException e) {
-	   		// TODO Auto-generated catch block
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
-	   	}
-			 
+		}
+
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-	    TimeZone zone = TimeZone.getDefault();
-	    formatter.setTimeZone(zone);
-	    String s = formatter.format(dateTemp);
-	    System.out.println(s);
-	    return s;
+		TimeZone zone = TimeZone.getDefault();
+		formatter.setTimeZone(zone);
+		String s = formatter.format(dateTemp);
+		//	    System.out.println(s);
+		return s;
 	}
+
+	public static boolean isThisApp(Context context){
+		ActivityManager mActivityManager = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
+		List<RunningTaskInfo> rti = mActivityManager.getRunningTasks(1); 
+		Log.i("123",""+rti.get(0).topActivity.getPackageName());
+		if(rti.get(0).topActivity.getPackageName().equals("com.howell.formuseum")){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
+	public static String getPhoneNum(Context context){
+
+		try {
+			TelephonyManager manager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+			return manager.getLine1Number();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static String getPhoneMac(Context context){
+		WifiManager wifiMgr = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
+		WifiInfo info = wifiMgr.getConnectionInfo();
+		String mac = info.getMacAddress();
+		DebugUtil.logE("getPhoneMac", mac);
+		mac = mac.replace(":", "");
+		mac = mac.replace("-", "");
+		DebugUtil.logE("getPhoneMac", mac);
+		return mac;
+	}
+
+	public static String getPhoneUid(Context context){
+		final String androidId = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
+		UUID uuid = null;
+		try {
+			if (!"9774d56d682e549c".equals(androidId)) //在主流厂商生产的设备上，有一个很经常的bug，就是每个设备都会产生相同的ANDROID_ID：9774d56d682e549c
+			{ 
+				uuid = UUID.nameUUIDFromBytes(androidId.getBytes("utf8"));
+			}
+			else
+			{
+				final String deviceId = ((TelephonyManager) context.getSystemService( Context.TELEPHONY_SERVICE )).getDeviceId();
+				uuid = deviceId != null ? UUID.nameUUIDFromBytes(deviceId.getBytes("utf8")) : UUID.randomUUID();
+			}
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if (uuid==null) {
+			return null;
+		}
+		DebugUtil.logE("get phone util", uuid.toString());
+		String id = uuid.toString();
+		id = id.replace("-", "");
+		id = id.replace(":", "");
+		DebugUtil.logE("get phone util", id);
+		return id;
+	}
+
+	public static String Date2ISODate(Date date){	
+		ISO8601DateFormat isoDate = new ISO8601DateFormat();
+		String isoString = isoDate.format(date);
+		Log.i("123", "isoDate:"+isoString);
+		return isoString;
+	}
+
+	public static String ISODateString2Date(String isoDate){
+		String str = null;
+		try {
+			Date date = ISO8601Utils.parse(isoDate);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			str = sdf.format(date);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return str;
+
+		//		DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");  
+		//		DateFormat sd=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  
+		//		try {  
+		//			return sd.format(sdf.parse(isoDate));  
+		//		} catch (ParseException e) {  
+		//			e.printStackTrace();  
+		//			return null;  
+		//		}  
+	}
+
+	public static String ISODateString2ISOString(String isoDate){
+		String str = null;
+		try{
+			Date date = ISO8601Utils.parse(isoDate);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+			str = sdf.format(date);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return str;
+
+
+	}
+
+
+
+
 }

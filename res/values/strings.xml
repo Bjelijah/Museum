@@ -13,9 +13,19 @@
     <string name="online">已连接</string>
 	<string name="offline">断开连接</string>
 	
-	<string name="press_talk_btn_state_1">按下按钮请求对讲</string>
+	<string name="press_talk_btn_state_1">按住按钮请求对讲</string>
 	<string name="press_talk_btn_state_2">正在请求对讲,请等待...</string>
-	<string name="press_talk_btn_state_3">正在对讲,按下按钮停止对讲</string>
-	
+	<string name="press_talk_btn_state_3">正在对讲,抬起按钮停止对讲</string>
+	<string name="press_talk_btn_state_4">对讲失败...用户名错误或被屏蔽,正在重新获取用户列表</string>
 	<string name="disconnect_2_talk_service">与语音平台断开连接，正在重新连接...</string>
+	
+	
+	
+	<!-- alarm type -->
+	<string name="alarmType_io">IO输入报警</string>
+	<string name="alarmType_vmd">移动侦测报警</string>
+	<string name="alarmType_videoloss">视频信号丢失报警</string>
+	<string name="alarmType_ircut">红外滤光切换报警</string>
+	<string name="alarmType_dayNight">黑白切换报警</string>
+	<string name="alarmType_recordState">录像状态切换报警</string>
 </resources>

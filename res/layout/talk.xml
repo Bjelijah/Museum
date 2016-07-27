@@ -17,8 +17,32 @@
             android:text="语音对讲"
             android:textSize="18sp" />
         
+        
+        <LinearLayout 
+            android:id="@+id/ll_talk_dialog_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            >
+            <ImageView android:id="@+id/iv_talk_user"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:src="@drawable/talk_dialog_list2"
+                
+                />
+            
+            
+        </LinearLayout>
+        
+        
+        
     </FrameLayout>
 
+    
+    
+    
+    
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -61,9 +85,24 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="40dp"
+           
+            android:layout_marginBottom="80dp"
             android:src="@drawable/talk_red" />
+
         
+ <!--  
+        <Button
+            android:id="@+id/btn_talk_test"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Button" />
+
+        <Button
+            android:id="@+id/btn_talk_test2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="button2" />
+    --> 
         <ImageView
 		    android:layout_width="match_parent"
 		    android:layout_height="wrap_content"

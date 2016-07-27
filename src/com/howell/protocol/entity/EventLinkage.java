@@ -47,7 +47,16 @@ public class EventLinkage {
 		this.eventState = eventState;
 		this.videoPreviewIdentifier = videoPreviewIdentifier;
 	}
-
+	public EventLinkage(String componentId,String eventType,String eventState,
+			ArrayList<VideoPreviewIdentifier> videoPreviewIdentifier,
+			ArrayList<VideoPlaybackIdentifier> videoPlayBackIdentifier){
+		super();
+		this.componentId = componentId;
+		this.eventType = eventType;
+		this.eventState = eventState;
+		this.videoPreviewIdentifier = videoPreviewIdentifier;
+		this.videoPlaybackIdentifier = videoPlayBackIdentifier;
+	}
 
 	public EventLinkage() {
 		super();

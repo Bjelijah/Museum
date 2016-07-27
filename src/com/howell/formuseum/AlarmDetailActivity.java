@@ -40,19 +40,18 @@ import com.howell.utils.MD5;
  * 类说明
  */
 public class AlarmDetailActivity extends Activity implements OnTouchListener{
-	private TextView mEventName/*,mEventState*/,mEventTime;
+	private TextView mEventName/*,mEventState*/,mEventType,mEventTime;
 	private LinearLayout mPictures;
 	private FrameLayout mPlayback,mPreview,mHandleAlarm;
 	private EventNotify eventNotify;
 	
-	//private LinearLayout mTalk;
+	private LinearLayout mTalk;
 	
 	private String webserviceIp,session,cookieHalf,verify;
 	private HttpProtocol hp;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.alarm_detail);
 		init();
@@ -61,13 +60,14 @@ public class AlarmDetailActivity extends Activity implements OnTouchListener{
 	
 	private void init(){
 		mEventName = (TextView)findViewById(R.id.tv_alarm_detail_name);
-		//mEventState = (TextView)findViewById(R.id.tv_alarm_detail_event_state);
+		mEventType = (TextView)findViewById(R.id.tv_alarm_detail_event_type);
 		mEventTime = (TextView)findViewById(R.id.tv_alarm_detail_event_time);
 		mPictures = (LinearLayout)findViewById(R.id.ll_alarm_detail_pictures);
 		mPlayback = (FrameLayout)findViewById(R.id.fl_alarm_detail_playback);
 		mPlayback.setOnTouchListener(this);
-		//mTalk = (LinearLayout)findViewById(R.id.ll_alarm_detail_talk);
-		//mTalk.setOnTouchListener(this);
+		mTalk = (LinearLayout)findViewById(R.id.ll_alarm_detail_talk);
+		mTalk.setOnTouchListener(this);
+		mTalk.setVisibility(View.VISIBLE);//FIXME 
 		mPreview = (FrameLayout)findViewById(R.id.fl_alarm_detail_preview);
 		mPreview.setOnTouchListener(this);
 		mHandleAlarm = (FrameLayout)findViewById(R.id.fl_alarm_detail_handle_alarm);
@@ -81,17 +81,23 @@ public class AlarmDetailActivity extends Activity implements OnTouchListener{
 		cookieHalf = intent.getStringExtra("cookieHalf");
 		verify = intent.getStringExtra("verify");
 		eventNotify = (EventNotify) intent.getSerializableExtra("eventNotify");
-		Log.e("eventNotify", eventNotify.toString());
+		Log.e("eventNotify","alarm detail oncreate"+ eventNotify.toString());
 		if(eventNotify.getName() == null){
 			mEventName.setText("");
 		}else{
 			mEventName.setText(eventNotify.getName().toString());
 		}
-		/*if(eventNotify.getEventState() == null){
-			mEventState.setText("");
+		if(eventNotify.getEventType() == null){
+			mEventType.setText("");
 		}else{
-			mEventState.setText(eventNotify.getEventState().toString());
-		}*/
+			if(eventNotify.getEventType().equals("IO")){
+				mEventType.setText("报警器报警");
+				
+			}else if(eventNotify.getEventType().equals("VMD")){
+				mEventType.setText("移动侦测报警");
+				mHandleAlarm.setVisibility(View.GONE);
+			}
+		}
 		String time = eventNotify.getTime();
 		mEventTime.setText(eventNotify.getDateYear(time)+"-"+eventNotify.getDateMonth(time)+"-"
 				+eventNotify.getDateDay(time)+" "+eventNotify.getDateHour(time)+":"+eventNotify.getDateMin(time)
@@ -130,7 +136,6 @@ public class AlarmDetailActivity extends Activity implements OnTouchListener{
 				
 				@Override
 				public boolean onTouch(View arg0, MotionEvent arg1) {
-					// TODO Auto-generated method stub
 					Intent intent = new Intent(AlarmDetailActivity.this,PictureActivity.class);
 					intent.putExtra("position", Integer.valueOf(imageView.getTag().toString()));
 					startActivity(intent);
@@ -144,7 +149,6 @@ public class AlarmDetailActivity extends Activity implements OnTouchListener{
 				private Bitmap bitmap;
 				@Override
 				protected Void doInBackground(Void... arg0) {
-					// TODO Auto-generated method stub
 					URL url;
 					try {
 						url = new URL(imgs[i]);
@@ -154,10 +158,8 @@ public class AlarmDetailActivity extends Activity implements OnTouchListener{
 				        
 				        CacheUtils.cachePictures(bitmap, "");
 					} catch (MalformedURLException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}  
 					return null;
@@ -181,7 +183,6 @@ public class AlarmDetailActivity extends Activity implements OnTouchListener{
 		private String fileName;
 		
 		public GetPictureTask(String img,ImageView imageView,String fileName) {
-			// TODO Auto-generated constructor stub
 			this.img = img;
 			this.imageView = imageView;
 			this.fileName = fileName;
@@ -189,7 +190,6 @@ public class AlarmDetailActivity extends Activity implements OnTouchListener{
 		
 		@Override
 		protected Void doInBackground(Void... arg0) {
-			// TODO Auto-generated method stub
 			URL url;
 			try {
 				Log.e(fileName, img);
@@ -200,10 +200,8 @@ public class AlarmDetailActivity extends Activity implements OnTouchListener{
 		        
 		        CacheUtils.cachePictures(bitmap, fileName);
 			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}  
 			return null;
@@ -217,7 +215,6 @@ public class AlarmDetailActivity extends Activity implements OnTouchListener{
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		// TODO Auto-generated method stub
 		switch (v.getId()) {
 		case R.id.fl_alarm_detail_preview://预览
 			Intent intent = new Intent(this,PlayerActivity.class);
@@ -225,6 +222,7 @@ public class AlarmDetailActivity extends Activity implements OnTouchListener{
 			intent.putExtra("cookieHalf", cookieHalf);
 			intent.putExtra("verify", verify);
 			intent.putExtra("webserviceIp", webserviceIp);
+		//	eventNotify.setEventState("Inactive");
 			intent.putExtra("eventNotify", eventNotify);
 			intent.putExtra("isPlayBack", false);
 			startActivity(intent);
@@ -240,10 +238,10 @@ public class AlarmDetailActivity extends Activity implements OnTouchListener{
 			intent.putExtra("isPlayBack", true);
 			startActivity(intent);
 			break;
-//		case R.id.ll_alarm_detail_talk:	//语音对讲
-//			intent = new Intent(this,TalkActivity.class);
-//			startActivity(intent);
-//			break;
+		case R.id.ll_alarm_detail_talk:	//语音对讲
+			intent = new Intent(this,TalkActivity.class);
+			startActivity(intent);
+			break;
 		case R.id.fl_alarm_detail_handle_alarm://处理警报
 			LayoutInflater layoutInflater = LayoutInflater.from(this);
 			final View view = layoutInflater.inflate(R.layout.process_dialog, null);
@@ -254,7 +252,6 @@ public class AlarmDetailActivity extends Activity implements OnTouchListener{
 				
 				@Override
 				public void onClick(DialogInterface arg0, int arg1) {
-					// TODO Auto-generated method stub
 					final EditText et = (EditText) view.findViewById(R.id.process_dialog_edittext);
 					Log.e("process", et.getText().toString());
 					//发送报警处理协议
@@ -263,13 +260,10 @@ public class AlarmDetailActivity extends Activity implements OnTouchListener{
 							try {
 								hp.process(webserviceIp, eventNotify.getId(), et.getText().toString(), cookieHalf+"verifysession="+MD5.getMD5("POST:"+"/howell/ver10/data_service/Business/Informations/IO/Inputs/Channels/"+eventNotify.getId()+"/Status/Process"+":"+verify));
 							} catch (NoSuchAlgorithmException e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							} catch (UnsupportedEncodingException e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							} catch (JSONException e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 						};
@@ -280,7 +274,6 @@ public class AlarmDetailActivity extends Activity implements OnTouchListener{
 				
 				@Override
 				public void onClick(DialogInterface arg0, int arg1) {
-					// TODO Auto-generated method stub
 					arg0.dismiss();
 				}
 			});

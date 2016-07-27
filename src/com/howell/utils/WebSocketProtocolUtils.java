@@ -76,16 +76,16 @@ public class WebSocketProtocolUtils {
 		JSONObject object = new JSONObject(JSONString);
 		int message = object.getInt("Message");
 		int cseq = object.getInt("CSeq");
-		System.out.println("aa");
+	
 		if(message == 0x8001){//报警推送连接协议
-			System.out.println("bb");
+			System.out.println("bb   报警推送连接协议");
 //			int cseq = object.getInt("CSeq");
 			JSONObject response = object.getJSONObject("Response");
 			String result = response.getString("Result");
 			return new AlarmPushConnectRes(message,cseq,result);
 		}else if(message == 0x8002){//报警推送心跳协议
 //			int cseq = object.getInt("CSeq");
-			System.out.println("cc");
+			System.out.println("cc  报警推送心跳协议");
 			JSONObject response = object.getJSONObject("Response");
 			String result = response.getString("Result");
 			String time;
@@ -100,9 +100,8 @@ public class WebSocketProtocolUtils {
 				heartbeatInterval = 0;
 			}
 			return new KeepAliveRes(message,cseq,result,new KeepAlive(time,heartbeatInterval));
-			
 		}else if(message == 0x0003){//ADC事件递交
-			System.out.println("dd");
+			System.out.println("dd   ADC事件递交");
 			JSONObject request = object.getJSONObject("Request");
 			JSONObject eventNotify = request.getJSONObject("EventNotify");
 			String id = eventNotify.getString("Id");
@@ -112,11 +111,11 @@ public class WebSocketProtocolUtils {
 			String time = eventNotify.getString("Time");
 			System.out.println("time_1:"+time.toString());
 			time = Utils.utc2TimeZone(eventNotify.getString("Time").substring(0, 19));
-			System.out.println("time_2:"+time);
+//			System.out.println("time_2:"+time);
 			String imageUrl = "";
 			try{
 				JSONArray imageUrls = eventNotify.getJSONArray("ImageUrl");
-				Log.e("size", imageUrls.length()+"");
+				Log.e("adc   ImageUrl size", imageUrls.length()+"");
 				String[] imgs = new String[imageUrls.length()]; 
 				for (int i = 0; i < imageUrls.length(); i++) {  
 					imgs[i] = imageUrls.get(i).toString();
@@ -124,7 +123,7 @@ public class WebSocketProtocolUtils {
 				}
 				EventNotify e = new EventNotify();
 				imageUrl = e.convertArrayToString(imgs);
-				System.out.println("ImageUrl:"+ imageUrl);
+//				System.out.println("ImageUrl:"+ imageUrl);
 			}catch(JSONException e){
 				Log.i("","imageUrl == null");
 				imageUrl = "";

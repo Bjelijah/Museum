@@ -108,6 +108,7 @@ containing a value of this type.
         public static final int pstsUnderlineHeight=0x7f010004;
     }
     public static final class color {
+        public static final int alarm_history_gray=0x7f040009;
         public static final int background_tab_pressed=0x7f040001;
         public static final int black=0x7f040006;
         public static final int dark_gray=0x7f040007;
@@ -162,83 +163,124 @@ containing a value of this type.
         public static final int reject_button_sel=0x7f02001e;
         public static final int second_floor=0x7f02001f;
         public static final int talk_bottom=0x7f020020;
-        public static final int talk_disconnect=0x7f020021;
-        public static final int talk_green=0x7f020022;
-        public static final int talk_red=0x7f020023;
-        public static final int talk_yellow=0x7f020024;
-        public static final int tenpay_top_bar=0x7f020025;
-        public static final int textfield_focused_holo_dark=0x7f020026;
-        public static final int textfield_focused_holo_light=0x7f020027;
-        public static final int tittel_button_bg=0x7f020028;
-        public static final int tittel_button_press_bg=0x7f020029;
-        public static final int waiting_bg=0x7f02002a;
-        public static final int z_arrow_down=0x7f02002b;
+        public static final int talk_dialog_list=0x7f020021;
+        public static final int talk_dialog_list2=0x7f020022;
+        public static final int talk_disconnect=0x7f020023;
+        public static final int talk_green=0x7f020024;
+        public static final int talk_red=0x7f020025;
+        public static final int talk_yellow=0x7f020026;
+        public static final int tenpay_top_bar=0x7f020027;
+        public static final int textfield_focused_holo_dark=0x7f020028;
+        public static final int textfield_focused_holo_light=0x7f020029;
+        public static final int tittel_button_bg=0x7f02002a;
+        public static final int tittel_button_press_bg=0x7f02002b;
+        public static final int waiting_bg=0x7f02002c;
+        public static final int z_arrow_down=0x7f02002d;
     }
     public static final class id {
-        public static final int action_settings=0x7f090026;
-        public static final int btn_get_maps=0x7f090012;
-        public static final int btn_login=0x7f090011;
-        public static final int btn_talk=0x7f090013;
-        public static final int et_login_account=0x7f09000e;
-        public static final int et_login_password=0x7f09000f;
-        public static final int et_login_webserviceip=0x7f090010;
-        public static final int fl_alarm_detail_handle_alarm=0x7f090006;
-        public static final int fl_alarm_detail_playback=0x7f090005;
-        public static final int fl_alarm_detail_preview=0x7f090004;
-        public static final int fl_map=0x7f090019;
-        public static final int glsurface_view=0x7f09001e;
-        public static final int head_arrowImageView=0x7f09000a;
-        public static final int head_contentLayout=0x7f090009;
-        public static final int head_lastUpdatedTextView=0x7f09000d;
-        public static final int head_progressBar=0x7f09000b;
-        public static final int head_tipsTextView=0x7f09000c;
-        public static final int iv_display_picture=0x7f090007;
-        public static final int iv_talk_btn=0x7f090023;
-        public static final int iv_talk_state=0x7f090020;
-        public static final int ll_alarm_detail_pictures=0x7f090003;
-        public static final int map_activity_img_alarm=0x7f090018;
-        public static final int map_list_item_alarm_icon=0x7f09001c;
-        public static final int map_list_listview=0x7f09001a;
-        public static final int pager=0x7f090015;
-        public static final int pb_display_picture=0x7f090008;
-        public static final int process_dialog_edittext=0x7f09001f;
-        public static final int progress_get_maps=0x7f090016;
-        public static final int tabs=0x7f090014;
-        public static final int talk_dialog_btn=0x7f090025;
-        public static final int talk_dialog_textview=0x7f090024;
-        public static final int tv_alarm_detail_event_time=0x7f090002;
-        public static final int tv_alarm_detail_name=0x7f090001;
+        public static final int action_settings=0x7f09003f;
+        public static final int btn_get_maps=0x7f09001e;
+        public static final int btn_login=0x7f09001c;
+        public static final int btn_talk=0x7f09001f;
+        public static final int button1_login=0x7f09001d;
+        public static final int dialog_listView=0x7f09003c;
+        public static final int et_login_account=0x7f090019;
+        public static final int et_login_password=0x7f09001a;
+        public static final int et_login_webserviceip=0x7f09001b;
+        public static final int ex_dailog_lv=0x7f09003a;
+        public static final int fl_alarm_detail_handle_alarm=0x7f09000a;
+        public static final int fl_alarm_detail_playback=0x7f090009;
+        public static final int fl_alarm_detail_preview=0x7f090008;
+        public static final int fl_map=0x7f090028;
+        public static final int glsurface_view=0x7f090030;
+        public static final int head_arrowImageView=0x7f090015;
+        public static final int head_contentLayout=0x7f090014;
+        public static final int head_lastUpdatedTextView=0x7f090018;
+        public static final int head_progressBar=0x7f090016;
+        public static final int head_tipsTextView=0x7f090017;
+        public static final int iv_alarm_detail_talk=0x7f090002;
+        public static final int iv_alarm_list_talk=0x7f09000d;
+        public static final int iv_display_picture=0x7f090012;
+        public static final int iv_map_list_talk=0x7f09002a;
+        public static final int iv_map_talk=0x7f090025;
+        public static final int iv_talk_btn=0x7f090037;
+        public static final int iv_talk_state=0x7f090034;
+        public static final int iv_talk_user=0x7f090033;
+        public static final int ll_alarm_detail_pictures=0x7f090007;
+        public static final int ll_alarm_detail_talk=0x7f090001;
+        public static final int ll_alarm_history_talk=0x7f09000c;
+        public static final int ll_map_list_talk=0x7f090029;
+        public static final int ll_map_talk=0x7f090024;
+        public static final int ll_talk_dialog_list=0x7f090032;
+        public static final int lv_alarm_history_list=0x7f09000f;
+        public static final int map_activity_img_alarm=0x7f090027;
+        public static final int map_list_item_alarm_icon=0x7f09002e;
+        public static final int map_list_listview=0x7f09002c;
+        public static final int pager=0x7f090021;
+        public static final int pb_display_picture=0x7f090013;
+        public static final int process_dialog_edittext=0x7f090031;
+        public static final int progress_get_maps=0x7f090022;
+        public static final int tabs=0x7f090020;
+        public static final int talk_dialog_btn=0x7f090039;
+        public static final int talk_dialog_list_cb=0x7f09003d;
+        public static final int talk_dialog_list_tv=0x7f09003e;
+        public static final int talk_dialog_textview=0x7f090038;
+        public static final int talk_list_group_tv=0x7f09003b;
+        public static final int tv_alarm_detail_event_time=0x7f090006;
+        public static final int tv_alarm_detail_event_type=0x7f090005;
+        public static final int tv_alarm_detail_name=0x7f090004;
+        public static final int tv_alarm_detail_talk=0x7f090003;
         public static final int tv_alarm_detail_title=0x7f090000;
-        public static final int tv_map_list_item=0x7f09001b;
-        public static final int tv_map_name=0x7f090017;
-        public static final int tv_talk_state=0x7f090021;
-        public static final int tv_talk_state2=0x7f090022;
-        public static final int viewPager=0x7f09001d;
+        public static final int tv_alarm_history_list_item_descripition=0x7f090011;
+        public static final int tv_alarm_history_list_item_name=0x7f090010;
+        public static final int tv_alarm_history_title=0x7f09000b;
+        public static final int tv_alarm_list_talk=0x7f09000e;
+        public static final int tv_map_list_item=0x7f09002d;
+        public static final int tv_map_list_talk=0x7f09002b;
+        public static final int tv_map_name=0x7f090023;
+        public static final int tv_map_talk=0x7f090026;
+        public static final int tv_talk_state=0x7f090035;
+        public static final int tv_talk_state2=0x7f090036;
+        public static final int viewPager=0x7f09002f;
     }
     public static final class layout {
         public static final int alarm_detail=0x7f030000;
-        public static final int display_picture=0x7f030001;
-        public static final int head=0x7f030002;
-        public static final int login_activity=0x7f030003;
-        public static final int logo=0x7f030004;
-        public static final int main_activity=0x7f030005;
-        public static final int map=0x7f030006;
-        public static final int map_list=0x7f030007;
-        public static final int map_list_item=0x7f030008;
-        public static final int picture_view=0x7f030009;
-        public static final int player=0x7f03000a;
-        public static final int process_dialog=0x7f03000b;
-        public static final int talk=0x7f03000c;
-        public static final int talk_dialog=0x7f03000d;
-        public static final int wait_dialog=0x7f03000e;
+        public static final int alarm_history_list=0x7f030001;
+        public static final int alarm_history_list_item=0x7f030002;
+        public static final int display_picture=0x7f030003;
+        public static final int head=0x7f030004;
+        public static final int login_activity=0x7f030005;
+        public static final int logo=0x7f030006;
+        public static final int main_activity=0x7f030007;
+        public static final int map=0x7f030008;
+        public static final int map_list=0x7f030009;
+        public static final int map_list_item=0x7f03000a;
+        public static final int picture_view=0x7f03000b;
+        public static final int player=0x7f03000c;
+        public static final int process_dialog=0x7f03000d;
+        public static final int talk=0x7f03000e;
+        public static final int talk_dialog=0x7f03000f;
+        public static final int talk_dialog_expandable_list=0x7f030010;
+        public static final int talk_dialog_group_item=0x7f030011;
+        public static final int talk_dialog_list=0x7f030012;
+        public static final int talk_dialog_list_item=0x7f030013;
+        public static final int wait_dialog=0x7f030014;
     }
     public static final class menu {
         public static final int main=0x7f080000;
     }
     public static final class string {
         public static final int action_settings=0x7f060001;
+        public static final int alarmType_dayNight=0x7f060013;
+        /**  alarm type 
+         */
+        public static final int alarmType_io=0x7f06000f;
+        public static final int alarmType_ircut=0x7f060012;
+        public static final int alarmType_recordState=0x7f060014;
+        public static final int alarmType_videoloss=0x7f060011;
+        public static final int alarmType_vmd=0x7f060010;
         public static final int app_name=0x7f060000;
-        public static final int disconnect_2_talk_service=0x7f06000d;
+        public static final int disconnect_2_talk_service=0x7f06000e;
         public static final int hello_world=0x7f060002;
         public static final int login=0x7f060007;
         public static final int login_account=0x7f060003;
@@ -250,6 +292,7 @@ containing a value of this type.
         public static final int press_talk_btn_state_1=0x7f06000a;
         public static final int press_talk_btn_state_2=0x7f06000b;
         public static final int press_talk_btn_state_3=0x7f06000c;
+        public static final int press_talk_btn_state_4=0x7f06000d;
     }
     public static final class style {
         /** 
@@ -327,7 +370,7 @@ containing a value of this type.
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:pstsDividerColor
+          @attr name com.howell.formuseum:pstsDividerColor
         */
         public static final int PagerSlidingTabStrip_pstsDividerColor = 2;
         /**
@@ -343,7 +386,7 @@ in (inches), mm (millimeters).
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:pstsDividerPadding
+          @attr name com.howell.formuseum:pstsDividerPadding
         */
         public static final int PagerSlidingTabStrip_pstsDividerPadding = 5;
         /**
@@ -358,7 +401,7 @@ containing a value of this type.
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:pstsIndicatorColor
+          @attr name com.howell.formuseum:pstsIndicatorColor
         */
         public static final int PagerSlidingTabStrip_pstsIndicatorColor = 0;
         /**
@@ -374,7 +417,7 @@ in (inches), mm (millimeters).
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:pstsIndicatorHeight
+          @attr name com.howell.formuseum:pstsIndicatorHeight
         */
         public static final int PagerSlidingTabStrip_pstsIndicatorHeight = 3;
         /**
@@ -390,7 +433,7 @@ in (inches), mm (millimeters).
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:pstsScrollOffset
+          @attr name com.howell.formuseum:pstsScrollOffset
         */
         public static final int PagerSlidingTabStrip_pstsScrollOffset = 7;
         /**
@@ -404,7 +447,7 @@ containing a value of this type.
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:pstsShouldExpand
+          @attr name com.howell.formuseum:pstsShouldExpand
         */
         public static final int PagerSlidingTabStrip_pstsShouldExpand = 9;
         /**
@@ -414,7 +457,7 @@ containing a value of this type.
 
           <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
-          @attr name android:pstsTabBackground
+          @attr name com.howell.formuseum:pstsTabBackground
         */
         public static final int PagerSlidingTabStrip_pstsTabBackground = 8;
         /**
@@ -430,7 +473,7 @@ in (inches), mm (millimeters).
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:pstsTabPaddingLeftRight
+          @attr name com.howell.formuseum:pstsTabPaddingLeftRight
         */
         public static final int PagerSlidingTabStrip_pstsTabPaddingLeftRight = 6;
         /**
@@ -444,7 +487,7 @@ containing a value of this type.
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:pstsTextAllCaps
+          @attr name com.howell.formuseum:pstsTextAllCaps
         */
         public static final int PagerSlidingTabStrip_pstsTextAllCaps = 10;
         /**
@@ -459,7 +502,7 @@ containing a value of this type.
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:pstsUnderlineColor
+          @attr name com.howell.formuseum:pstsUnderlineColor
         */
         public static final int PagerSlidingTabStrip_pstsUnderlineColor = 1;
         /**
@@ -475,7 +518,7 @@ in (inches), mm (millimeters).
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:pstsUnderlineHeight
+          @attr name com.howell.formuseum:pstsUnderlineHeight
         */
         public static final int PagerSlidingTabStrip_pstsUnderlineHeight = 4;
     };

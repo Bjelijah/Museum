@@ -7,6 +7,9 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.howell.formusemu.action.AudioAction;
+import com.howell.formusemu.action.LoginAction;
+import com.howell.formusemu.action.OnAudioStoping;
 import com.howell.protocol.HttpProtocol;
 import com.howell.protocol.entity.Device;
 import com.howell.protocol.entity.EventLinkage;
@@ -15,10 +18,13 @@ import com.howell.protocol.entity.EventNotify;
 import com.howell.protocol.entity.PlaybackTask;
 import com.howell.protocol.entity.VideoPlaybackIdentifier;
 import com.howell.render.YV12Renderer;
+import com.howell.service.TalkService;
+import com.howell.utils.DebugUtil;
 import com.howell.utils.JsonUtils;
 import com.howell.utils.MD5;
+import com.howell.utils.TalkManager;
 import com.howell.utils.Utils;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -39,7 +45,7 @@ import android.widget.Toast;
  *
  * 类说明
  */
-public class PlayerActivity extends Activity implements Callback{
+public class PlayerActivity extends Activity implements Callback,OnAudioStoping{
 	
 	private EventNotify eventNotify;
 	private String webserviceIp,session,cookieHalf,verify;
@@ -63,6 +69,8 @@ public class PlayerActivity extends Activity implements Callback{
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.player);
+		TalkManager.getInstance().registerOnAudioStop(this);
+		stopTalkService();
 		isPlayback = init();
 		Log.e("", "isPlayback:"+isPlayback);
 		PlayerThread thread = new PlayerThread();
@@ -107,6 +115,20 @@ public class PlayerActivity extends Activity implements Callback{
 		}.execute();*/
 	}
 	
+	private void stopTalkService(){
+		Intent talkIntent = new Intent(this,TalkService.class);
+		stopService(talkIntent);
+	}
+	
+	private void startTalkService(){
+		Intent talkIntent = new Intent(this,TalkService.class);
+		talkIntent.putExtra("session", LoginAction.getInstance().getSession());
+		talkIntent.putExtra("account", LoginAction.getInstance().getAccount());
+		talkIntent.putExtra("mac", LoginAction.getInstance().getMac());
+		talkIntent.putExtra("uuid", LoginAction.getInstance().getUuid());
+		startService(talkIntent);
+	}
+	
 	private class PlayerThread extends Thread{
 		
 		@Override
@@ -116,6 +138,7 @@ public class PlayerActivity extends Activity implements Callback{
 			boolean ret = false;
 			getEventLinkage();
 			if(url != null){
+			
 				ret = display(isPlayback ? 1 : 0);
 			}else{
 				Log.e("", "url is null");
@@ -128,6 +151,7 @@ public class PlayerActivity extends Activity implements Callback{
 	}
 	
 	Handler handler = new Handler(){
+		@SuppressLint("NewApi")
 		public void handleMessage(android.os.Message msg) {
 			switch(msg.what){
 			case LOGIN_FAIL:
@@ -140,7 +164,6 @@ public class PlayerActivity extends Activity implements Callback{
 						@Override
 						public void onClick(DialogInterface arg0, int arg1) {
 							// TODO Auto-generated method stub
-							
 							PlayerActivity.this.finish();
 						}
 					})   
@@ -164,7 +187,7 @@ public class PlayerActivity extends Activity implements Callback{
 		time = eventNotify.getTime();
 		
 		hp = new HttpProtocol();
-		jni = new JNIManager();
+		jni = JNIManager.getInstance();
 		
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 	    mGlView = (GLSurfaceView)findViewById(R.id.glsurface_view);
@@ -204,10 +227,12 @@ public class PlayerActivity extends Activity implements Callback{
 			Log.e("", "getEventLinkage");
 			String deviceId = "";
 			EventLinkage eventLinkage = JsonUtils.parseEventLinkageJsonObject(new JSONObject(hp.linkage(webserviceIp, eventNotify.getId(), eventNotify.getEventType(), eventNotify.getEventState(),cookieHalf+"verifysession="+MD5.getMD5("GET:"+"/howell/ver10/data_service/management/System/Events/Linkages/Components/"+eventNotify.getId()+"/"+eventNotify.getEventType()+"/"+eventNotify.getEventState()+":"+verify))));
-			if(eventLinkage.getVideoPlaybackIdentifier() != null){
+			if(eventLinkage.getVideoPlaybackIdentifier() != null && isPlayback){
+//				Log.i("123", "111111");
 				deviceId = setDeviceId(eventLinkage.getVideoPlaybackIdentifier().get(0).getVideoInputChannelId());
 				slot = getSlot(eventLinkage.getVideoPlaybackIdentifier().get(0).getVideoInputChannelId()) - 1;
 			}else{
+//				Log.i("123", "2222222");
 				deviceId = setDeviceId(eventLinkage.getVideoPreviewIdentifier().get(0).getVideoInputChannelId());
 				slot = getSlot(eventLinkage.getVideoPreviewIdentifier().get(0).getVideoInputChannelId()) - 1;
 			}
@@ -221,18 +246,18 @@ public class PlayerActivity extends Activity implements Callback{
 			//int beg = eventLinkage.getVideoPlaybackIdentifier().get(0).getBeginTime();
 			//int end = eventLinkage.getVideoPlaybackIdentifier().get(0).getEndTime();
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IndexOutOfBoundsException e){
 			e.printStackTrace();
 		}
 	}
 	
 	private boolean display(int isplayback){
+		Log.i("123", "url"+url+"    isplayback="+isplayback);
 		if(jni.register(url) == 0){
 			//失败
 			Log.e("", "login失败");
@@ -249,7 +274,11 @@ public class PlayerActivity extends Activity implements Callback{
 			short beg[] = Utils.getFiveSecondsBeforeDate(date);
 			short end[] = Utils.getTwoSecondsAfterDate(date);
 			
-			jni.display(isplayback, beg[0], beg[1], beg[2], beg[3], beg[4], beg[5], end[0], end[1], end[2], end[3], end[4], end[5], slot);
+			int ret = jni.display(isplayback, beg[0], beg[1], beg[2], beg[3], beg[4], beg[5], end[0], end[1], end[2], end[3], end[4], end[5], slot);
+			if(ret == 0){
+				return false;
+			}
+			
 			return true;
 		}
 	}
@@ -280,12 +309,23 @@ public class PlayerActivity extends Activity implements Callback{
 	@Override
 	protected void onDestroy() {
 		//Log.e("", "onDestroy");
-		super.onDestroy();
-		System.runFinalization();
+	
+		DebugUtil.logV(null, "player activity on destroy");
 		if(url != null){
+			
+			AudioAction.getInstance().audioStop();
+		//	AudioAction.getInstance().deInitAudio();//FIXME
 			jni.stopPlay(isPlayback ? 1 : 0);
 			jni.unregister();
+		
+		}else{
+			DebugUtil.logE(null, "url == null  jni not stopPlay not unregister !!!!");
 		}
+		System.gc();
+//		System.runFinalization();
+		TalkManager.getInstance().unregisterOnAudioStop(this);
+		startTalkService();
+		super.onDestroy();
 	}
 
 	@Override
@@ -311,6 +351,14 @@ public class PlayerActivity extends Activity implements Callback{
 	@Override
 	public void surfaceDestroyed(SurfaceHolder arg0) {
 		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onAudioStop() {
+		//jni.audioPlay();
+	//	AudioAction.getInstance().initAudio();//FIXME
+		AudioAction.getInstance().audioPlay();
 		
 	}
 }

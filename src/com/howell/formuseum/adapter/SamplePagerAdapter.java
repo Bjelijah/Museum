@@ -8,10 +8,12 @@ import uk.co.senab.photoview.PhotoViewAttacher.OnViewTapListener;
 
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 
+import com.howell.utils.DebugUtil;
 import com.howell.utils.PhoneConfigUtils;
 import com.howell.utils.ScaleImageUtils;
 
@@ -60,13 +62,16 @@ public class SamplePagerAdapter extends PagerAdapter implements OnViewTapListene
 		//获取手机屏幕宽度
 		int requiredWidthSize = PhoneConfigUtils.getPhoneWidth(context);
 		PhotoView photoView = new PhotoView(container.getContext());
+		DebugUtil.logE("123", "instantiateItem   aaaaaaaa");
 		photoView.setImageBitmap(ScaleImageUtils.decodeFile(requiredWidthSize,requiredWidthSize * 3 / 4
 					,new File(mList.get(position))));
+		DebugUtil.logE("123", "instantiateItem   bbbbbbb");
 		//注册点击事件
 		//photoView.setOnViewTapListener(this);
 		// Now just add PhotoView to ViewPager and return it
 		container.addView(photoView, LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT);
 		photoView.setTag(position);
+	
 		return photoView;
 	}
 

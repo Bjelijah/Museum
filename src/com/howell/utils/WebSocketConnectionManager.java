@@ -22,7 +22,7 @@ public class WebSocketConnectionManager {
 		startTimer();
 	}
 	
-	public interface OnDisconncetListener{
+	public interface OnDisconncetListener{//ob 接口
 		public void OnDisconnect();
 	};
 	

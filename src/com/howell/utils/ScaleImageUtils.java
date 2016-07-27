@@ -23,7 +23,8 @@ public class ScaleImageUtils {
             //final int REQUIRED_SIZE = 70;  
             int REQUIRED_WIDTH_SIZE = requiredWidthSize;
             int REQUIRED_HEIGHT_SIZE = requiredHeightSize;
-            int width_tmp = o.outWidth, height_tmp = o.outHeight;  
+            int width_tmp = o.outWidth;
+            int height_tmp = o.outHeight;  
             
             int scale = 1;  
             while (true) {  
@@ -38,6 +39,7 @@ public class ScaleImageUtils {
             // decode with inSampleSize  
             BitmapFactory.Options o2 = new BitmapFactory.Options();  
             o2.inSampleSize = scale;  
+            DebugUtil.logI("decodeFile","width_tmp="+width_tmp+" height_tmp="+height_tmp+ " scale="+scale);
             return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);  
         } catch (FileNotFoundException e) {  
         }  

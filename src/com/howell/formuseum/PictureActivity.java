@@ -29,7 +29,6 @@ public class PictureActivity extends Activity implements OnPageChangeListener{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.picture_view);
 		init();
-		
 	}
 	
 	public ArrayList<String> getFileName(File file){
@@ -54,7 +53,6 @@ public class PictureActivity extends Activity implements OnPageChangeListener{
         }catch(OutOfMemoryError e){
         	System.out.println("OutOfMemory");
         }
-        
         viewPager.setAdapter(adapter);
         viewPager.setCurrentItem(position);
         viewPager.setOnPageChangeListener(this);

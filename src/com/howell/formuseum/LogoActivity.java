@@ -8,11 +8,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.KeyguardManager;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.howell.formusemu.action.LoginAction;
 import com.howell.protocol.HttpProtocol;
 import com.howell.protocol.entity.ClientCredential;
 import com.howell.protocol.entity.Fault;
@@ -21,6 +23,7 @@ import com.howell.utils.DialogUtils;
 import com.howell.utils.JsonUtils;
 import com.howell.utils.MD5;
 import com.howell.utils.SharedPreferencesUtils;
+import com.howell.utils.Utils;
 
 /**
  * @author 霍之昊 
@@ -31,7 +34,7 @@ public class LogoActivity extends Activity {
 	private String account;
 	private String password;
 	private String webserviceIp;
-	
+	boolean bStartByAlarm = false;
 	private String createClientNonce(int length){
 		String str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";  
         Random random = new Random();  
@@ -69,55 +72,61 @@ public class LogoActivity extends Activity {
 				Intent intent = new Intent(LogoActivity.this,MapListActivity.class);
 				intent.putExtra("session", fault.getId());
 				intent.putExtra("cookieHalf", cookieHalf);
+				intent.putExtra("webserviceIp", webserviceIp);
+				intent.putExtra("account", account);
+				LoginAction.getInstance().setAccount(account).setCookieHalf(cookieHalf)
+				.setSession(fault.getId()).setWebserviceIp(webserviceIp);
+			
 				try {
 					intent.putExtra("verify", MD5.getMD5(password2));
+					LoginAction.getInstance().setVerify(MD5.getMD5(password2));
 				} catch (NoSuchAlgorithmException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (UnsupportedEncodingException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				intent.putExtra("webserviceIp", webserviceIp);
 				startActivity(intent);
 				LogoActivity.this.finish();
 			}else{
 				return false;
 			}
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 			return false;
 		}
 		return true;
 	}
 	
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.logo);
-		new AsyncTask<Void, Integer, Void>() {
-			
+	public void foo(boolean b){
+		new AsyncTask<Boolean, Integer, Void>() {
 			private static final int LOGIN_NOW = 1;
 			private static final int LOGIN_AFTER = 2;
 			private int loginMethod;
 			
 			@Override
-			protected Void doInBackground(Void... arg0) {
-				// TODO Auto-generated method stub
+			protected Void doInBackground(Boolean... arg0) {
+				//FIXME
+//				if (arg0[0]) {
+//					loginMethod = LOGIN_NOW;
+//					if(!LoginAction.getInstance().login(LogoActivity.this)){
+//						Log.i("123", "log after");
+//						loginMethod = LOGIN_AFTER;
+//					}else{
+//						Log.i("123", "log now");
+//						LogoActivity.this.finish();
+//					}
+//					
+//					return null;
+//				}
 				try {
 					Thread.sleep(1000);
 					account = SharedPreferencesUtils.getAccount(LogoActivity.this);
@@ -126,17 +135,22 @@ public class LogoActivity extends Activity {
 					Log.e("", "account:"+account+" password:"+password+ " webserviceIp:"+webserviceIp);
 					if(account.equals("") && password.equals("") && webserviceIp.equals("")){
 						//直接进入地图列表页面
-						loginMethod = LOGIN_AFTER;
-						
+						loginMethod = LOGIN_AFTER;	
 					}else{
 						//进入登录页面
+												
+						String uuid = Utils.getPhoneUid(LogoActivity.this);
+						String mac  = Utils.getPhoneMac(LogoActivity.this);
+						
+						LoginAction.getInstance().setName(account).setPwd(password).setWebserviceIp(webserviceIp)
+						.setUuid(uuid).setMac(mac)
+						.saveTalkInfo(LogoActivity.this);
 						loginMethod = LOGIN_NOW;
 						if(!login()){
 							loginMethod = LOGIN_AFTER;
 						}
 					}
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				return null;
@@ -144,7 +158,6 @@ public class LogoActivity extends Activity {
 			
 			@Override
 			protected void onPostExecute(Void result) {
-				// TODO Auto-generated method stub
 				super.onPostExecute(result);
 				if(loginMethod == LOGIN_AFTER){
 					Intent intent = new Intent(LogoActivity.this,LoginActivity.class);
@@ -152,7 +165,78 @@ public class LogoActivity extends Activity {
 					LogoActivity.this.finish();
 				}
 			}
-		}.execute();
+		}.execute(b);	
+	}
+	
+	public boolean isLocked(){
+		KeyguardManager mKeyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);   
+	      
+	    if (mKeyguardManager.inKeyguardRestrictedInputMode()) {  
+	        // keyguard on  
+	    	Log.i("123", "logo is lock");
+	    	return true;
+	    }  else{
+	    	Log.i("123", "logo no lock");
+	    	return false;
+	    }
+	}
+	
+	@Override
+	protected void onRestart() {
+		// TODO Auto-generated method stub
+		Log.i("123", "logo on restart");
+		foo(true);
+		super.onRestart();
+	}
+	@Override
+	protected void onStart() {
+		// TODO Auto-generated method stub
+		Log.i("123", "logo on start");
+		super.onStart();
+	}	
+	
+	@Override
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		Log.i("123", "on stop");
+		super.onStop();
+	}
+	
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		Log.i("123", "on destroy");
+		super.onDestroy();
+	}
+	
+	
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		Log.i("123", "logo on pause");
+		super.onPause();
+	}
+	
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
 		
+		Log.i("123", "logo on resume");
+		super.onResume();
+	}
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.logo);
+		
+	
+		boolean b = getIntent().getBooleanExtra("fromAlarmReceiver",false);
+		bStartByAlarm = b;
+		if(b && isLocked()){
+			return;
+		}
+		Log.i("123", "show logo b:"+b);
+		foo(b);	
 	}
 }

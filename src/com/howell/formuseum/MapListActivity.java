@@ -15,6 +15,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Base64;
@@ -30,19 +31,26 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.howell.db.DBManager;
 import com.howell.ehlib.MyListView;
 import com.howell.ehlib.MyListView.OnRefreshListener;
+import com.howell.formusemu.action.AlarmHistoryAction;
+import com.howell.formusemu.action.LoginAction;
+import com.howell.formuseum.bean.AlarmMapInfo;
 import com.howell.protocol.HttpProtocol;
 import com.howell.protocol.entity.Map;
 import com.howell.protocol.entity.MapItem;
 import com.howell.protocol.entity.MapItemList;
 import com.howell.protocol.entity.MapList;
+import com.howell.service.TalkService;
 import com.howell.utils.CacheUtils;
 import com.howell.utils.JsonUtils;
 import com.howell.utils.MD5;
+import com.howell.utils.SharedPreferencesUtils;
+import com.howell.utils.TalkManager;
 import com.howell.utils.Utils;
 
 /**
@@ -53,7 +61,7 @@ import com.howell.utils.Utils;
 public class MapListActivity extends Activity implements OnRefreshListener,OnItemClickListener,OnClickListener{
 	
 	private MyListView listview;
-	//private LinearLayout mTalk;
+	private LinearLayout mTalk;
 	private HttpProtocol hp;
 	private DBManager mgr;
 	
@@ -61,13 +69,16 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 	private MapListAdapter adapter;
 	
 	//协议相关
-	private String webserviceIp,session,cookieHalf,verify;
+	private String webserviceIp,session,cookieHalf,verify,account;
 	
 	private MsgReceiver msgReceiver; 
+	
+	private boolean bAlarm = false;//来自后台报警的调用 if true 将 跳转 map activity
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
+		Log.i("123", "maplistActivity  on create");
 		super.onCreate(savedInstanceState);
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
 		setContentView(R.layout.map_list);
 		init();
 		registerReceiver();
@@ -76,19 +87,31 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 	
 	@Override
 	protected void onResume() {
-		// TODO Auto-generated method stub
 		super.onResume();
+	
+		
+		int rotatin = this.getWindowManager().getDefaultDisplay().getRotation();
+		Log.e("123", "on resume update alarm rot="+rotatin);
+		
 		updateAlarm();
 	}
 	
 	@Override
 	protected void onDestroy() {
-		// TODO Auto-generated method stub
 		super.onDestroy();
 		if(mgr != null){
 			mgr.closeDB();
 		}
 		unregisterReceiver(msgReceiver);
+//		Intent talkIntent = new Intent(this,TalkService.class);//FIXME stop service: app won't accept calling form webService
+//		stopService(talkIntent);
+	}
+	
+	private synchronized void checkIfFromAlarm(){
+		bAlarm = SharedPreferencesUtils.getIsAlarm(this);
+		if (bAlarm) {
+			SharedPreferencesUtils.setAlarm(this, false);
+		}
 	}
 	
 	private void registerReceiver(){
@@ -105,6 +128,9 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 	      	stopService(intent);
 		}
 		intent.putExtra("session", session);
+		intent.putExtra("cookieHalf", cookieHalf);
+		intent.putExtra("verify", verify);
+		intent.putExtra("webserviceIp", webserviceIp);
 		startService(intent); 
 	}
 	
@@ -138,8 +164,9 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 		listview = (MyListView)findViewById(R.id.map_list_listview);
 		listview.setonRefreshListener(this);
 		listview.setOnItemClickListener(this);
-		//mTalk = (LinearLayout)findViewById(R.id.ll_map_list_talk);
-		//mTalk.setOnClickListener(this);
+		mTalk = (LinearLayout)findViewById(R.id.ll_map_list_talk);
+		mTalk.setOnClickListener(this);
+		mTalk.setVisibility(View.VISIBLE);//FIXME 
 		hp = new HttpProtocol();
 		
 		Intent intent = getIntent();
@@ -147,10 +174,27 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 		session = intent.getStringExtra("session");
 		cookieHalf = intent.getStringExtra("cookieHalf");
 		verify = intent.getStringExtra("verify");
-		
+		Log.i("123", "init verify="+verify);
+		account = intent.getStringExtra("account");
 		mapList = new ArrayList<Map>();
 		adapter = new MapListAdapter(this,mapList);
 		listview.setAdapter(adapter);
+		//init talk   FIXME
+//		TalkManager.getInstance().setId(session).setName(account);//FIXME
+//		if (TalkManager.getInstance().get_register_state()!=1) {//未注册
+//			TalkManager.getInstance().registerService();
+//		}
+		String mac = Utils.getPhoneMac(this);
+		String uuid = Utils.getPhoneUid(this);
+		LoginAction.getInstance().setMac(mac).setUuid(uuid).setSession(session).setAccount(account);
+		
+		
+		Intent talkIntent = new Intent(this,TalkService.class);
+		talkIntent.putExtra("session", session);
+		talkIntent.putExtra("account", account);
+		talkIntent.putExtra("mac", mac);
+		talkIntent.putExtra("uuid", uuid);
+		startService(talkIntent);
 	}
 	
 	private boolean compareString(String s1,String s2){
@@ -201,18 +245,16 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 			}
 			
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
 	private void updateMaps(){
+		Log.i("123", "updateMaps");
 		mgr.deleteTable("map");
 		mgr.deleteTable("map_item");
 		mgr.deleteTable("alarm_list");
@@ -221,14 +263,15 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 		getMaps();
 	}
 
+
 	@Override
 	public void onRefresh() {
-		// TODO Auto-generated method stub
+		Log.i("123", "map list activity onrefresh");
+		
 		new AsyncTask<Void, Integer, Void>() {
 
 			@Override
 			protected Void doInBackground(Void... arg0) {
-				// TODO Auto-generated method stub
 				updateMaps();
 				return null;
 			}
@@ -236,6 +279,7 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 			protected void onPostExecute(Void result) {
 				//adapter.notifyDataSetChanged();
 				adapter.setMapList(mapList);
+				Log.e("123", "onrefresh update alarm");
 				updateAlarm();
 				listview.onRefreshComplete();
 			};
@@ -245,7 +289,7 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 
 	@Override
 	public void onFirstRefresh() {
-		// TODO Auto-generated method stub
+		Log.i("123", "on first refresh");
 		mgr = new DBManager(this);
 		mapList = mgr.queryMap();
 		MapList maps;
@@ -256,13 +300,10 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 				updateMaps();
 			}
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -276,26 +317,69 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 
 	@Override
 	public void onFirstRefreshDown() {
-		// TODO Auto-generated method stub
 		//adapter.notifyDataSetChanged();
 		adapter.setMapList(mapList);
+		Log.e("123", "on first refresh update alarm");
 		updateAlarm();
 		listview.onRefreshComplete();
 	}
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// TODO Auto-generated method stub
-		menu.add("退出登录");
+		menu.add(0, 0, Menu.NONE, "历史报警");
+		menu.add(1,1,Menu.NONE,"退出登录");
+//		menu.add("退出登录");
 		return super.onCreateOptionsMenu(menu);
 	}
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// TODO Auto-generated method stub
-		Intent intent = new Intent(this,LoginActivity.class);
-		startActivity(intent);
-		finish();
+		switch (item.getItemId()) {
+		case 0:{
+			Log.i("123", "历史记录");
+			//
+			try {
+				
+//				AlarmHistoryAction.getInstance().setWebServiceIP(webserviceIp).setCookie(cookieHalf+"verifysession="+MD5.getMD5("GET:"+"/howell/ver10/data_service/Business/Informations/Event/Linkages:"+verify));
+//				AlarmHistoryAction.getInstance().setWebServiceIP(webserviceIp).setCookie(cookieHalf+"verifysession="+MD5.getMD5("GET:"+"/howell/ver10/data_service/business/informations/Business/Informations/Event/Records:"+verify));
+				AlarmHistoryAction.getInstance()
+				.setWebServiceIP(webserviceIp)
+				.setCookie(cookieHalf+"verifysession="+MD5.getMD5("GET:"+"/howell/ver10/data_service/Business/Informations/Event/Records:"+verify))
+				.setSession(session)
+				.setCookieHalf(cookieHalf)
+				.setVerify(verify);
+				Log.i("123", "verify:"+verify);
+//				AlarmHistoryAction.getInstance().setWebServiceIP(webserviceIp).setCookie(cookieHalf+"verifysession="+MD5.getMD5("GET:"+"/howell/ver10/data_service/business/informations/Business/Informations/Devices:"+verify));
+//				AlarmHistoryAction.getInstance().setWebServiceIP(webserviceIp).setCookie(cookieHalf+"verifysession="+MD5.getMD5("GET:"+"/howell/ver10/data_service/Business/Informations/Devices:"+verify));
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			Intent intent = new Intent(this,AlarmHistoryListActivity.class);
+			startActivity(intent);
+		}
+			break;
+		case 1:{
+			//登出
+			//停止服务1 talkservice  2 myservice
+			
+			
+			Intent talkIntent = new Intent(this,TalkService.class);
+			stopService(talkIntent);
+			
+			Intent myIntent = new Intent(this,MyService.class);
+			stopService(myIntent);
+			
+			
+			Intent intent = new Intent(this,LoginActivity.class);
+			startActivity(intent);
+			finish();
+		}
+			break;
+		default:
+			break;
+		}
 		return super.onOptionsItemSelected(item);
 	}
 	
@@ -315,25 +399,21 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 
 		@Override
 	    public int getCount() {
-	        // TODO Auto-generated method stub
 	        return mapList.size() ;
 	    }
 
 	    @Override
 	    public Object getItem(int position) {
-	        // TODO Auto-generated method stub
 	        return mapList.get(position) ;
 	    }
 
 	    @Override
 	    public long getItemId(int position) {
-	        // TODO Auto-generated method stub
 	        return position;
 	    }
 
 	    @Override
 	    public View getView(int position, View convertView, ViewGroup parent) {
-	        // TODO Auto-generated method stub
 	    	System.out.println("getView:"+position);
 	    	ViewHolder holder = null;
 	    	if (convertView == null) {
@@ -348,6 +428,7 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 	         	holder = (ViewHolder)convertView.getTag();
 	        }
 	    	holder.mapName.setText(Utils.utf8Togb2312(new String(Base64.decode(mapList.get(position).getName(),0))));
+//	    	holder.mapName.setText(new String(Base64.decode(mapList.get(position).getName(),0)));
 	    	if(mapList.get(position).isHasAlarm()){
 	    		holder.alarmIcon.setVisibility(View.VISIBLE);
 	    	}else{
@@ -364,7 +445,6 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View view, int arg2, long arg3) {
-		// TODO Auto-generated method stub
 		mapList.get((int)arg3).setHasAlarm(false);
 		adapter.notifyDataSetChanged();
 		Intent intent = new Intent(this,MapActivity.class);
@@ -377,6 +457,10 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 	}
 
 	private void updateAlarm(){
+		if (mapList.size()==0) {
+			return;
+		}
+		Log.i("123", "map list size="+mapList.size());
 		for(Map map : mapList){
 			if(mgr.hasAlarmWithMapId(map.getId())){
 				map.setHasAlarm(true);
@@ -384,8 +468,43 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 				map.setHasAlarm(false);
 			}
 		}
+		
+		//来自 后台报警 自动 跳转
+		checkIfFromAlarm();
+		Map alarmMap=null;
+		Log.i("123", " update Alarm  bAlarm="+bAlarm);
+		boolean bHasAlarm = false;
+		
+		if (bAlarm) {
+			for(Map map:mapList){
+				if (map.isHasAlarm()) {
+					map.setHasAlarm(false);
+					alarmMap = map;
+					Log.i("123", "has alarm");
+					bHasAlarm = true;
+					break;
+				}
+			}
+			Log.i("123", "bHasAlarm="+bHasAlarm);
+			if (bHasAlarm) {
+				//跳转 到 map
+				Intent intent = new Intent(this,MapActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+				intent.putExtra("map", alarmMap);
+				intent.putExtra("session", session);
+				intent.putExtra("cookieHalf", cookieHalf);
+				intent.putExtra("verify", verify);
+				intent.putExtra("webserviceIp", webserviceIp);
+				startActivity(intent);
+			//	this.finish();
+			}
+			
+		}
 		adapter.notifyDataSetChanged();
 	}
+	
+	
+	
 	
 	/** 
 	   * 广播接收器 
@@ -395,12 +514,13 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 	public class MsgReceiver extends BroadcastReceiver{  
 		@Override  
 		public void onReceive(Context context, Intent intent) {  
-			System.out.println("MapListActivity收到广播！！！");
+//			System.out.println("MapListActivity收到广播！！！");
 			//ret:0 登录失败 1 登录成功 2 有报警  -2 其它
 			int ret = intent.getIntExtra("ret", -2); 
-			System.out.println("login ret :"+ret);
+			System.out.println("msgReceiver ret :"+ret);
 			if(ret == 2){
 				//获取数据库数据
+				Log.e("123", "msgreceiver updata alarm");
 				updateAlarm();
 			}
 		}  
@@ -408,12 +528,12 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 
 	@Override
 	public void onClick(View v) {
-		// TODO Auto-generated method stub
 		switch (v.getId()) {
-//		case R.id.ll_map_list_talk:
-//			Intent intent = new Intent(this,TalkActivity.class);
-//			startActivity(intent);
-//			break;
+		case R.id.ll_map_list_talk:
+			Intent intent = new Intent(this,TalkActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+			startActivity(intent);
+			break;
 
 		default:
 			break;

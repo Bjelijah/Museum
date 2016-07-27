@@ -11,4 +11,7 @@
   	<color name="dark_gray">#222325</color>
   	
   	<color name="talk_btn_red">#ff5959</color>
+  	
+  	<color name="alarm_history_gray">#969696</color>
+  	
 </resources>

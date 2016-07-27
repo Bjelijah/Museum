@@ -13,6 +13,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import com.howell.formuseum.JNIManager;
 
+
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -83,12 +84,22 @@ public class YV12Renderer implements Renderer {
 	private Context context_;
 	private GLSurfaceView gl_surface_view_;
 	
+	public void requestRender() {
+//		Log.d("render","native invoke render ");
+		gl_surface_view_.requestRender();//FIXME
+	}
+	
+	
 	public YV12Renderer(Context context, GLSurfaceView view,JNIManager jni) {
 		context_ = context;
 		gl_surface_view_ = view;
-		jni.setGl_surface_view_(gl_surface_view_);
+		
 		this.jni = jni;
 		jni.nativeInit();
+		
+		jni.YUVSetCallbackObject(this, 0);
+	
+		
 	}
 	
 	// Wrap a float[] in a direct FloatBuffer using native byte order.

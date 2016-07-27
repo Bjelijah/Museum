@@ -2,6 +2,8 @@ package com.howell.protocol.entity;
 
 import java.io.Serializable;
 
+import com.howell.utils.DebugUtil;
+
 /**
  * @author 霍之昊 
  *
@@ -100,6 +102,7 @@ public class EventNotify implements Serializable{
 		return time;
 	}
 	public void setTime(String time) {
+		DebugUtil.logI("eventnotfy", "time="+time);
 		this.time = time;
 	}
 	public String getPath() {

@@ -1,7 +1,11 @@
 package com.howell.formuseum;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Logger;
 
 import org.json.JSONException;
 
@@ -16,11 +20,17 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.howell.db.DBManager;
+import com.howell.formusemu.action.AudioAction;
+import com.howell.formusemu.action.OnAudioComing;
+import com.howell.protocol.Const;
 import com.howell.protocol.CseqManager;
 import com.howell.protocol.entity.EventNotify;
 import com.howell.protocol.entity.EventNotifyRes;
 import com.howell.protocol.entity.KeepAliveRes;
+import com.howell.utils.DebugUtil;
+import com.howell.utils.DialogUtils;
 import com.howell.utils.SystemUpTimeUtils;
+import com.howell.utils.TalkManager;
 import com.howell.utils.WebSocketConnectionManager;
 import com.howell.utils.WebSocketProtocolUtils;
 
@@ -28,7 +38,7 @@ import de.tavendo.autobahn.WebSocketConnection;
 import de.tavendo.autobahn.WebSocketConnectionHandler;
 import de.tavendo.autobahn.WebSocketException;
 
-public class MyService extends Service{
+public class MyService extends Service implements Const,OnAudioComing{
 	
 	private NotificationManager mNotificationManager;  
 	private Notification mNotification; 
@@ -39,26 +49,30 @@ public class MyService extends Service{
 	private CseqManager mCseqManager;
 	private SystemUpTimeUtils systemUpTimeUtil;
 //	private WebSocketConnectionManager connectionManager;
-	private String username,websocket_ip,session;
+	private String username,websocket_ip,session,webServiceIP,cookieHalf,verify;
+	
 	
 	@SuppressWarnings("deprecation")
 //	private void alarmStreamFun(String id,int slot,String ip,String name,int year,int month,int day,int hour,int min,int sec){
 	private void alarmStreamFun(EventNotifyRes res){
 		EventNotify eventNotify = ((EventNotifyRes) res).getEventNotify();
-		Log.e("alarmStreamFun",eventNotify.toString());
+//		Log.e("alarmStreamFun",eventNotify.toString());
     	String componentId = eventNotify.getId();
     	String name = eventNotify.getName();
     	String eventState = ((EventNotifyRes) res).getEventNotify().getEventState();
-    	
+    	String eventType = eventNotify.getEventType();
     	//设置内存里设备的id(notification id)号
     	int temp_id = mgr.selectEventNotifySqlKey(eventNotify);
     	
     	//isAlarmed 0：未查看警报 1：已查看警报
+//    	Log.e("123", "eventState:"+eventState);
     	if(eventState.equals("Active")){
     		Log.e("alarmStreamFun", "State is Active");
     		if(!mgr.containsEventNotify(eventNotify)){
+//    			Log.e("123", "mgr add alarm");
         		mgr.addAlarmList(eventNotify);
     		}else{
+//    			Log.e("123", "mgr set alarmed 0");
     			eventNotify.setIsAlarmed(0);
     		}
     		// ② 初始化Notification  
@@ -67,8 +81,35 @@ public class MyService extends Service{
     	    long when = System.currentTimeMillis();  
     	    mNotification = new Notification(icon,tickerText,when);  
     	    mNotification.flags = Notification.FLAG_AUTO_CANCEL;  
-    	    mNotification.defaults = Notification.DEFAULT_VIBRATE| Notification.DEFAULT_SOUND;
+    	    mNotification.defaults = Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND;
     	    // ③ 定义notification的消息 和 PendingIntent  
+    	    
+    	    
+    	/*    
+    	    try {
+				Field field = mNotification.getClass().getDeclaredField("extraNotification");
+				Object extraNotification = field.get(mNotification);
+				Method method = extraNotification.getClass().getDeclaredMethod("setMessageCount", int.class);
+				method.invoke(extraNotification, 10);
+				Log.e("123", "set method ok");
+			} catch (NoSuchFieldException e) {
+				// TODO Auto-generated catch block
+				Log.i("123","notification   get field error");
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	  */  
     	    Context context = this;  
     	    CharSequence contentTitle = name + "入侵警报";  
     	    CharSequence contentText = name + "入侵警报";  
@@ -78,17 +119,36 @@ public class MyService extends Service{
     	    mNotification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);  
     	    mNotificationManager.notify(temp_id,mNotification);  
     	}else{
-    		Log.e("alarmStreamFun", "State is Inactive");
-    		eventNotify.setIsAlarmed(1);
+    		Log.e("alarmStreamFun", "State is Inactive    type="+ eventType);
+
+    		if (DebugUtil.isDebug()) {//FIXME
+    			if (eventType.equals("VMD")) {
+    				return ;//FIXME
+				}
+			}
+    		eventNotify.setIsAlarmed(1);//FIXME
+//    		if(!DebugUtil.isDebug()){
+//    			eventNotify.setIsAlarmed(1);//FIXME
+//    		}
+    			
+//    		if(!eventType.equals("VMD")){
+//    			eventNotify.setIsAlarmed(1);//FIXME
+//    		}
     		mNotificationManager.cancel(mgr.selectEventNotifySqlKey(eventNotify));
     	}
     	mgr.updateEventNotifyAlarmFlag(eventNotify);
-    	Log.e("alarmStreamFun2",eventNotify.toString());
+//    	Log.e("alarmStreamFun2",eventNotify.toString());
 		//发送Action为com.howell.formuseum.RECEIVER的广播  
 		my_intent.putExtra("ret", 2); 
 		my_intent.putExtra("alarmCamera", eventNotify);
 	    sendBroadcast(my_intent);  
-	        
+		Intent intent = new Intent("com.howell.receiver.ReceiveAlarm");
+		intent.putExtra("alarmCamera", eventNotify);
+		intent.putExtra("session", session);
+		intent.putExtra("webServiceIP", webServiceIP);
+		intent.putExtra("cookieHalf", cookieHalf);
+		intent.putExtra("verify", verify);
+		sendBroadcast(intent);
 	}
 	
 	private void start(final String websocket_ip,final String session) {
@@ -97,6 +157,7 @@ public class MyService extends Service{
 		final String wsuri = "ws://"+websocket_ip+":8803/howell/ver10/ADC";
 		//ws://host:8803/howell/ver10/ADC
 //		final String wsuri = "ws://"+websocket_ip+":8803/111";
+//		Log.e("", "jzh??????????");
 		try {
 			mConnection.connect(wsuri, new WebSocketConnectionHandler() {
 		    	@Override
@@ -113,7 +174,6 @@ public class MyService extends Service{
 		    		timer.schedule(new TimerTask() {
 						@Override
 						public void run() {
-							// TODO Auto-generated method stub
 							//发送心跳给服务器1分钟1次
 							mConnection.sendTextMessage(WebSocketProtocolUtils.createKeepAliveJSONObject(mCseqManager.getCseq(),systemUpTimeUtil.getSystemUpTime()).toString());
 						}
@@ -122,7 +182,7 @@ public class MyService extends Service{
 
 			    @Override
 			    public void onTextMessage(String payload) {
-			    	Log.e("", "Got echo: " + payload);
+			    	Log.i("log123", "收到报警   playload="+payload);
 			    	try {
 						Object res = WebSocketProtocolUtils.parseJSONString(payload);
 						if(res != null){
@@ -133,7 +193,7 @@ public class MyService extends Service{
 //										,((EventNotifyRes) res).getEventNotify().getDateYear(),((EventNotifyRes) res).getEventNotify().getDateMonth(),((EventNotifyRes) res).getEventNotify().getDateDay()
 //										,((EventNotifyRes) res).getEventNotify().getDateHour(),((EventNotifyRes) res).getEventNotify().getDateMin(),((EventNotifyRes) res).getEventNotify().getDateSec());
 								//if(((EventNotifyRes) res).getEventNotify().getEventState().equals("Active")){
-									alarmStreamFun((EventNotifyRes)res);
+								alarmStreamFun((EventNotifyRes)res);
 								//}
 								
 								mConnection.sendTextMessage(WebSocketProtocolUtils.createADCResJSONObject(((EventNotifyRes) res).getcSeq()).toString());
@@ -143,7 +203,6 @@ public class MyService extends Service{
 							}
 						}
 					} catch (JSONException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 			    }
@@ -151,8 +210,8 @@ public class MyService extends Service{
 			    @Override
 			    public void onClose(int code, String reason) {
 			    	//登录失败
-			        Log.e("", "Connection lost.");
-			        Log.e("","reason:"+reason + " code:"+code);
+			        //Log.e("", "Connection lost.");
+//			        Log.e("","ws close, reason:"+reason + " code:"+code);
 			        systemUpTimeUtil.stopTimer();
 //		    		connectionManager.stopTimer();
 		    		if(timer != null){
@@ -173,9 +232,13 @@ public class MyService extends Service{
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-//		// TODO Auto-generated method stub
 		Log.e("service", "start");
 		startForeground(100, new Notification());
+		
+		
+		AudioAction.getInstance().registerOnAudioComing(this);
+		
+		
 //		systemUpTimeUtil = new SystemUpTimeUtils();
 //		connectionManager = new WebSocketConnectionManager();
 //		connectionManager.setOnDisconncetListener(this);
@@ -184,6 +247,9 @@ public class MyService extends Service{
 		websocket_ip = sharedPreferences.getString("webserviceIp", "");
 		username = sharedPreferences.getString("account", "");
 		session = intent.getStringExtra("session");
+		webServiceIP = intent.getStringExtra("webserviceIp");
+		cookieHalf = intent.getStringExtra("cookieHalf");
+		verify = intent.getStringExtra("verify");		
 		initNotification();
 		//初始化DBManager  
 		if(mgr == null)
@@ -195,19 +261,18 @@ public class MyService extends Service{
 	
 	@Override
 	public void onCreate() {
-		// TODO Auto-generated method stub
+		AudioAction.getInstance().initAudioRecord();
+		AudioAction.getInstance().initAudio();
 		super.onCreate();
 	}
 	
 	@Override
 	public IBinder onBind(Intent arg0) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
 	public void onDestroy() {
-		// TODO Auto-generated method stub
 		super.onDestroy();
 		System.out.println("service onDestory");
 //		quit();
@@ -221,6 +286,12 @@ public class MyService extends Service{
 			mgr.closeDB();
 		if(systemUpTimeUtil != null)
 			systemUpTimeUtil.stopTimer();
+		
+	
+	
+		AudioAction.getInstance().unregisterOnAudioComing(this);
+		AudioAction.getInstance().deInitAudio();
+		AudioAction.getInstance().deInitAudioRecord();
 //		connectionManager.stopTimer();
 	}
 	
@@ -230,6 +301,16 @@ public class MyService extends Service{
         mNotificationManager = (NotificationManager)this.getSystemService(ns);  
 	}
 
+	@Override
+	public void onAudioComing() {
+		AudioAction.getInstance().audioPlay();
+		
+		//talk 界面
+		TalkManager.getInstance().startTalkActivity(this);
+		
+		
+		
+	}
 }
 
 
