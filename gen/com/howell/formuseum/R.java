@@ -108,16 +108,16 @@ containing a value of this type.
         public static final int pstsUnderlineHeight=0x7f010004;
     }
     public static final class color {
-        public static final int alarm_history_gray=0x7f040009;
-        public static final int background_tab_pressed=0x7f040001;
-        public static final int black=0x7f040006;
-        public static final int dark_gray=0x7f040007;
-        public static final int gray=0x7f040005;
-        public static final int green=0x7f040004;
-        public static final int red=0x7f040003;
-        public static final int talk_btn_red=0x7f040008;
-        public static final int text_hint_gray=0x7f040000;
-        public static final int white=0x7f040002;
+        public static final int alarm_history_gray=0x7f050009;
+        public static final int background_tab_pressed=0x7f050001;
+        public static final int black=0x7f050006;
+        public static final int dark_gray=0x7f050007;
+        public static final int gray=0x7f050005;
+        public static final int green=0x7f050004;
+        public static final int red=0x7f050003;
+        public static final int talk_btn_red=0x7f050008;
+        public static final int text_hint_gray=0x7f050000;
+        public static final int white=0x7f050002;
     }
     public static final class dimen {
         /**  Default screen margins, per the Android Design guidelines. 
@@ -126,8 +126,8 @@ containing a value of this type.
          screen margins) for sw720dp devices (e.g. 10" tablets) in landscape here.
     
          */
-        public static final int activity_horizontal_margin=0x7f050000;
-        public static final int activity_vertical_margin=0x7f050001;
+        public static final int activity_horizontal_margin=0x7f060000;
+        public static final int activity_vertical_margin=0x7f060001;
     }
     public static final class drawable {
         public static final int alarm=0x7f020000;
@@ -178,70 +178,70 @@ containing a value of this type.
         public static final int z_arrow_down=0x7f02002d;
     }
     public static final class id {
-        public static final int action_settings=0x7f09003f;
-        public static final int btn_get_maps=0x7f09001e;
-        public static final int btn_login=0x7f09001c;
-        public static final int btn_talk=0x7f09001f;
-        public static final int button1_login=0x7f09001d;
-        public static final int dialog_listView=0x7f09003c;
-        public static final int et_login_account=0x7f090019;
-        public static final int et_login_password=0x7f09001a;
-        public static final int et_login_webserviceip=0x7f09001b;
-        public static final int ex_dailog_lv=0x7f09003a;
-        public static final int fl_alarm_detail_handle_alarm=0x7f09000a;
-        public static final int fl_alarm_detail_playback=0x7f090009;
-        public static final int fl_alarm_detail_preview=0x7f090008;
-        public static final int fl_map=0x7f090028;
-        public static final int glsurface_view=0x7f090030;
-        public static final int head_arrowImageView=0x7f090015;
-        public static final int head_contentLayout=0x7f090014;
-        public static final int head_lastUpdatedTextView=0x7f090018;
-        public static final int head_progressBar=0x7f090016;
-        public static final int head_tipsTextView=0x7f090017;
-        public static final int iv_alarm_detail_talk=0x7f090002;
-        public static final int iv_alarm_list_talk=0x7f09000d;
-        public static final int iv_display_picture=0x7f090012;
-        public static final int iv_map_list_talk=0x7f09002a;
-        public static final int iv_map_talk=0x7f090025;
-        public static final int iv_talk_btn=0x7f090037;
-        public static final int iv_talk_state=0x7f090034;
-        public static final int iv_talk_user=0x7f090033;
-        public static final int ll_alarm_detail_pictures=0x7f090007;
-        public static final int ll_alarm_detail_talk=0x7f090001;
-        public static final int ll_alarm_history_talk=0x7f09000c;
-        public static final int ll_map_list_talk=0x7f090029;
-        public static final int ll_map_talk=0x7f090024;
-        public static final int ll_talk_dialog_list=0x7f090032;
-        public static final int lv_alarm_history_list=0x7f09000f;
-        public static final int map_activity_img_alarm=0x7f090027;
-        public static final int map_list_item_alarm_icon=0x7f09002e;
-        public static final int map_list_listview=0x7f09002c;
-        public static final int pager=0x7f090021;
-        public static final int pb_display_picture=0x7f090013;
-        public static final int process_dialog_edittext=0x7f090031;
-        public static final int progress_get_maps=0x7f090022;
-        public static final int tabs=0x7f090020;
-        public static final int talk_dialog_btn=0x7f090039;
-        public static final int talk_dialog_list_cb=0x7f09003d;
-        public static final int talk_dialog_list_tv=0x7f09003e;
-        public static final int talk_dialog_textview=0x7f090038;
-        public static final int talk_list_group_tv=0x7f09003b;
-        public static final int tv_alarm_detail_event_time=0x7f090006;
-        public static final int tv_alarm_detail_event_type=0x7f090005;
-        public static final int tv_alarm_detail_name=0x7f090004;
-        public static final int tv_alarm_detail_talk=0x7f090003;
-        public static final int tv_alarm_detail_title=0x7f090000;
-        public static final int tv_alarm_history_list_item_descripition=0x7f090011;
-        public static final int tv_alarm_history_list_item_name=0x7f090010;
-        public static final int tv_alarm_history_title=0x7f09000b;
-        public static final int tv_alarm_list_talk=0x7f09000e;
-        public static final int tv_map_list_item=0x7f09002d;
-        public static final int tv_map_list_talk=0x7f09002b;
-        public static final int tv_map_name=0x7f090023;
-        public static final int tv_map_talk=0x7f090026;
-        public static final int tv_talk_state=0x7f090035;
-        public static final int tv_talk_state2=0x7f090036;
-        public static final int viewPager=0x7f09002f;
+        public static final int action_settings=0x7f0a003f;
+        public static final int btn_get_maps=0x7f0a001e;
+        public static final int btn_login=0x7f0a001c;
+        public static final int btn_talk=0x7f0a001f;
+        public static final int button1_login=0x7f0a001d;
+        public static final int dialog_listView=0x7f0a003c;
+        public static final int et_login_account=0x7f0a0019;
+        public static final int et_login_password=0x7f0a001a;
+        public static final int et_login_webserviceip=0x7f0a001b;
+        public static final int ex_dailog_lv=0x7f0a003a;
+        public static final int fl_alarm_detail_handle_alarm=0x7f0a000a;
+        public static final int fl_alarm_detail_playback=0x7f0a0009;
+        public static final int fl_alarm_detail_preview=0x7f0a0008;
+        public static final int fl_map=0x7f0a0028;
+        public static final int glsurface_view=0x7f0a0030;
+        public static final int head_arrowImageView=0x7f0a0015;
+        public static final int head_contentLayout=0x7f0a0014;
+        public static final int head_lastUpdatedTextView=0x7f0a0018;
+        public static final int head_progressBar=0x7f0a0016;
+        public static final int head_tipsTextView=0x7f0a0017;
+        public static final int iv_alarm_detail_talk=0x7f0a0002;
+        public static final int iv_alarm_list_talk=0x7f0a000d;
+        public static final int iv_display_picture=0x7f0a0012;
+        public static final int iv_map_list_talk=0x7f0a002a;
+        public static final int iv_map_talk=0x7f0a0025;
+        public static final int iv_talk_btn=0x7f0a0037;
+        public static final int iv_talk_state=0x7f0a0034;
+        public static final int iv_talk_user=0x7f0a0033;
+        public static final int ll_alarm_detail_pictures=0x7f0a0007;
+        public static final int ll_alarm_detail_talk=0x7f0a0001;
+        public static final int ll_alarm_history_talk=0x7f0a000c;
+        public static final int ll_map_list_talk=0x7f0a0029;
+        public static final int ll_map_talk=0x7f0a0024;
+        public static final int ll_talk_dialog_list=0x7f0a0032;
+        public static final int lv_alarm_history_list=0x7f0a000f;
+        public static final int map_activity_img_alarm=0x7f0a0027;
+        public static final int map_list_item_alarm_icon=0x7f0a002e;
+        public static final int map_list_listview=0x7f0a002c;
+        public static final int pager=0x7f0a0021;
+        public static final int pb_display_picture=0x7f0a0013;
+        public static final int process_dialog_edittext=0x7f0a0031;
+        public static final int progress_get_maps=0x7f0a0022;
+        public static final int tabs=0x7f0a0020;
+        public static final int talk_dialog_btn=0x7f0a0039;
+        public static final int talk_dialog_list_cb=0x7f0a003d;
+        public static final int talk_dialog_list_tv=0x7f0a003e;
+        public static final int talk_dialog_textview=0x7f0a0038;
+        public static final int talk_list_group_tv=0x7f0a003b;
+        public static final int tv_alarm_detail_event_time=0x7f0a0006;
+        public static final int tv_alarm_detail_event_type=0x7f0a0005;
+        public static final int tv_alarm_detail_name=0x7f0a0004;
+        public static final int tv_alarm_detail_talk=0x7f0a0003;
+        public static final int tv_alarm_detail_title=0x7f0a0000;
+        public static final int tv_alarm_history_list_item_descripition=0x7f0a0011;
+        public static final int tv_alarm_history_list_item_name=0x7f0a0010;
+        public static final int tv_alarm_history_title=0x7f0a000b;
+        public static final int tv_alarm_list_talk=0x7f0a000e;
+        public static final int tv_map_list_item=0x7f0a002d;
+        public static final int tv_map_list_talk=0x7f0a002b;
+        public static final int tv_map_name=0x7f0a0023;
+        public static final int tv_map_talk=0x7f0a0026;
+        public static final int tv_talk_state=0x7f0a0035;
+        public static final int tv_talk_state2=0x7f0a0036;
+        public static final int viewPager=0x7f0a002f;
     }
     public static final class layout {
         public static final int alarm_detail=0x7f030000;
@@ -267,32 +267,35 @@ containing a value of this type.
         public static final int wait_dialog=0x7f030014;
     }
     public static final class menu {
-        public static final int main=0x7f080000;
+        public static final int main=0x7f090000;
+    }
+    public static final class raw {
+        public static final int my_alaram_default=0x7f040000;
     }
     public static final class string {
-        public static final int action_settings=0x7f060001;
-        public static final int alarmType_dayNight=0x7f060013;
+        public static final int action_settings=0x7f070001;
+        public static final int alarmType_dayNight=0x7f070013;
         /**  alarm type 
          */
-        public static final int alarmType_io=0x7f06000f;
-        public static final int alarmType_ircut=0x7f060012;
-        public static final int alarmType_recordState=0x7f060014;
-        public static final int alarmType_videoloss=0x7f060011;
-        public static final int alarmType_vmd=0x7f060010;
-        public static final int app_name=0x7f060000;
-        public static final int disconnect_2_talk_service=0x7f06000e;
-        public static final int hello_world=0x7f060002;
-        public static final int login=0x7f060007;
-        public static final int login_account=0x7f060003;
-        public static final int login_password=0x7f060004;
-        public static final int login_talk_ip=0x7f060006;
-        public static final int login_webservice_ip=0x7f060005;
-        public static final int offline=0x7f060009;
-        public static final int online=0x7f060008;
-        public static final int press_talk_btn_state_1=0x7f06000a;
-        public static final int press_talk_btn_state_2=0x7f06000b;
-        public static final int press_talk_btn_state_3=0x7f06000c;
-        public static final int press_talk_btn_state_4=0x7f06000d;
+        public static final int alarmType_io=0x7f07000f;
+        public static final int alarmType_ircut=0x7f070012;
+        public static final int alarmType_recordState=0x7f070014;
+        public static final int alarmType_videoloss=0x7f070011;
+        public static final int alarmType_vmd=0x7f070010;
+        public static final int app_name=0x7f070000;
+        public static final int disconnect_2_talk_service=0x7f07000e;
+        public static final int hello_world=0x7f070002;
+        public static final int login=0x7f070007;
+        public static final int login_account=0x7f070003;
+        public static final int login_password=0x7f070004;
+        public static final int login_talk_ip=0x7f070006;
+        public static final int login_webservice_ip=0x7f070005;
+        public static final int offline=0x7f070009;
+        public static final int online=0x7f070008;
+        public static final int press_talk_btn_state_1=0x7f07000a;
+        public static final int press_talk_btn_state_2=0x7f07000b;
+        public static final int press_talk_btn_state_3=0x7f07000c;
+        public static final int press_talk_btn_state_4=0x7f07000d;
     }
     public static final class style {
         /** 
@@ -316,11 +319,11 @@ containing a value of this type.
     
  API 14 theme customizations can go here. 
          */
-        public static final int AppBaseTheme=0x7f070000;
+        public static final int AppBaseTheme=0x7f080000;
         /**  Application theme. 
  All customizations that are NOT specific to a particular API-level can go here. 
          */
-        public static final int AppTheme=0x7f070001;
+        public static final int AppTheme=0x7f080001;
     }
     public static final class styleable {
         /** Attributes that can be used with a PagerSlidingTabStrip.

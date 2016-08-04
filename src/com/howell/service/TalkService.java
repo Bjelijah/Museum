@@ -43,6 +43,7 @@ public class TalkService extends Service {
 		if(intent == null){
 			DebugUtil.logE("TalkService", "start command intent = null");
 		}
+	
 		String session = null;
 		String account = null;
 		String mac = null;

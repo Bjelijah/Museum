@@ -79,7 +79,7 @@
         <activity
             android:name="com.howell.formuseum.AlarmHistoryListActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:theme="@android:style/Theme.Holo.Light.Dialog"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar"
             android:screenOrientation="portrait" >
         </activity>
         <activity

@@ -3,6 +3,9 @@ package com.howell.formuseum;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
@@ -20,6 +23,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.howell.db.DBManager;
+import com.howell.formusemu.action.AlarmSound;
 import com.howell.formusemu.action.AudioAction;
 import com.howell.formusemu.action.OnAudioComing;
 import com.howell.protocol.Const;
@@ -29,6 +33,7 @@ import com.howell.protocol.entity.EventNotifyRes;
 import com.howell.protocol.entity.KeepAliveRes;
 import com.howell.utils.DebugUtil;
 import com.howell.utils.DialogUtils;
+import com.howell.utils.SdCardUtil;
 import com.howell.utils.SystemUpTimeUtils;
 import com.howell.utils.TalkManager;
 import com.howell.utils.WebSocketConnectionManager;
@@ -51,6 +56,7 @@ public class MyService extends Service implements Const,OnAudioComing{
 //	private WebSocketConnectionManager connectionManager;
 	private String username,websocket_ip,session,webServiceIP,cookieHalf,verify;
 	
+	private Map<String, Integer> alarmSoundMap = null;
 	
 	@SuppressWarnings("deprecation")
 //	private void alarmStreamFun(String id,int slot,String ip,String name,int year,int month,int day,int hour,int min,int sec){
@@ -68,6 +74,15 @@ public class MyService extends Service implements Const,OnAudioComing{
 //    	Log.e("123", "eventState:"+eventState);
     	if(eventState.equals("Active")){
     		Log.e("alarmStreamFun", "State is Active");
+    		
+    		/*
+    		 * 语言警报
+    		 */
+    		
+    		AlarmSound alarmSound = new AlarmSound();
+    		alarmSound.playSound(this,name);
+//    		alarmSound.playSound(this,1);
+    		
     		if(!mgr.containsEventNotify(eventNotify)){
 //    			Log.e("123", "mgr add alarm");
         		mgr.addAlarmList(eventNotify);
@@ -263,6 +278,7 @@ public class MyService extends Service implements Const,OnAudioComing{
 	public void onCreate() {
 		AudioAction.getInstance().initAudioRecord();
 		AudioAction.getInstance().initAudio();
+		SdCardUtil.createAlarmSoundDir();
 		super.onCreate();
 	}
 	
@@ -311,6 +327,37 @@ public class MyService extends Service implements Const,OnAudioComing{
 		
 		
 	}
+	
+	
+	
+	
+	private void initAlarmSoundMap(){
+		if (alarmSoundMap!=null) {
+			return;
+		}
+		alarmSoundMap = new HashMap<String, Integer>();
+		alarmSoundMap.put("", 1);
+		
+		
+		
+	}
+	
+	private int getAlarmSoundNum(String alarmName){
+		if (alarmName==null) {
+			return -1;
+		}
+		if(alarmSoundMap==null){
+			initAlarmSoundMap();
+		}
+		int alarmNum = -1;
+		try {
+			alarmNum = alarmSoundMap.get(alarmName);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return alarmNum;
+	}
+	
 }
 
 
