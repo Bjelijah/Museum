@@ -40,6 +40,7 @@ import com.howell.ehlib.MyListView.OnRefreshListener;
 import com.howell.formusemu.action.AlarmHistoryAction;
 import com.howell.formusemu.action.LoginAction;
 import com.howell.formuseum.bean.AlarmMapInfo;
+import com.howell.formuseum.bean.HistoryAlarm;
 import com.howell.protocol.HttpProtocol;
 import com.howell.protocol.entity.Map;
 import com.howell.protocol.entity.MapItem;
@@ -61,7 +62,7 @@ import com.howell.utils.Utils;
 public class MapListActivity extends Activity implements OnRefreshListener,OnItemClickListener,OnClickListener{
 	
 	private MyListView listview;
-	private LinearLayout mTalk;
+	private LinearLayout mTalk,mSetting,mHistory;
 	private HttpProtocol hp;
 	private DBManager mgr;
 	
@@ -72,6 +73,8 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 	private String webserviceIp,session,cookieHalf,verify,account;
 	
 	private MsgReceiver msgReceiver; 
+	private UpdataReceiver updataReceiver;
+	
 	
 	private boolean bAlarm = false;//来自后台报警的调用 if true 将 跳转 map activity
 	@Override
@@ -105,6 +108,7 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 		unregisterReceiver(msgReceiver);
 //		Intent talkIntent = new Intent(this,TalkService.class);//FIXME stop service: app won't accept calling form webService
 //		stopService(talkIntent);
+		unregisterReceiver(updataReceiver);
 	}
 	
 	private synchronized void checkIfFromAlarm(){
@@ -119,6 +123,12 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 	    IntentFilter intentFilter = new IntentFilter();  
 	    intentFilter.addAction("com.howell.formuseum.RECEIVER");  
 	    registerReceiver(msgReceiver, intentFilter);
+	    
+	    
+	    updataReceiver = new UpdataReceiver();
+	    IntentFilter intentFilter2 = new IntentFilter();
+	    intentFilter2.addAction("com.howell.formuseum.updataReceive");
+	    registerReceiver(updataReceiver,intentFilter2);
 	}
 	
 	private void initService(){
@@ -167,6 +177,13 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 		mTalk = (LinearLayout)findViewById(R.id.ll_map_list_talk);
 		mTalk.setOnClickListener(this);
 		mTalk.setVisibility(View.VISIBLE);//FIXME 
+		
+		mSetting = (LinearLayout) findViewById(R.id.ll_map_list_setting);
+		mSetting.setOnClickListener(this);
+		mHistory = (LinearLayout) findViewById(R.id.ll_map_list_history);
+		mHistory.setOnClickListener(this);
+		
+		
 		hp = new HttpProtocol();
 		
 		Intent intent = getIntent();
@@ -204,19 +221,19 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 	private boolean isMapUpdate(ArrayList<Map> newMaps,ArrayList<Map> oldMaps){
 		if(newMaps.size() != oldMaps.size()){
 			//平台传入的地图列表个数与之前不一样，重新更新
-			Log.e("","有更新");
+			Log.e("123","有更新");
 			return true;
 		}else{
 			//平台传入的地图列表个数与之前一样，检查每个map的md5码和子模块更新时间
 			for(int i = 0 ; i < newMaps.size() ; i ++){
 				if(!compareString(newMaps.get(i).getMD5Code(),oldMaps.get(i).getMD5Code())
 						|| !compareString(newMaps.get(i).getLastModificationTime(),oldMaps.get(i).getLastModificationTime())){
-					Log.e("","有更新");
+					Log.e("123","有更新");
 					return true;
 				}
 			}
 		}
-		Log.e("","没有更新");
+		Log.e("123","没有更新");
 		return false;
 	}
 	
@@ -526,6 +543,40 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 		}  
 	}
 
+	public class UpdataReceiver extends BroadcastReceiver{
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			new Thread(){
+				public void run() {
+					MapList maps;
+					try {
+						maps = JsonUtils.parseMapsJsonObject(new JSONObject(hp.maps(webserviceIp, 1, 10,cookieHalf+"verifysession="+MD5.getMD5("GET:"+"/howell/ver10/data_service/management/System/Maps:"+verify))));
+						//判断是否有更新
+						if(isMapUpdate(maps.getMap(), mapList)){
+							updateMaps();
+						}
+					} catch (NoSuchAlgorithmException e) {
+						e.printStackTrace();
+					} catch (UnsupportedEncodingException e) {
+						e.printStackTrace();
+					} catch (JSONException e) {
+						e.printStackTrace();
+					} catch (Exception e){
+						e.printStackTrace();
+					}
+				};
+			}.start();
+			
+		
+		}
+		
+	}
+	
+	
+	
+	
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
@@ -534,7 +585,34 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 			intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 			startActivity(intent);
 			break;
-
+		case R.id.ll_map_list_setting:
+			Intent settingIntent = new Intent(this,SettingActivity.class);
+			startActivity(settingIntent);
+		
+			break;
+		case R.id.ll_map_list_history:
+			try {
+				AlarmHistoryAction.getInstance()
+				.setWebServiceIP(webserviceIp)
+				.setCookie(cookieHalf+"verifysession="+MD5.getMD5("GET:"+"/howell/ver10/data_service/Business/Informations/Event/Records:"+verify))
+				.setSession(session)
+				.setCookieHalf(cookieHalf)
+				.setVerify(verify);
+			} catch (NoSuchAlgorithmException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
+			
+			Intent historyIntent = new Intent(this,AlarmHistoryListActivity.class);
+			startActivity(historyIntent);
+			break;
+			
+			
 		default:
 			break;
 		}

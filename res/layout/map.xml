@@ -29,7 +29,7 @@
 	            android:layout_gravity="center"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
-	            android:src="@drawable/icon_talk"
+	            android:src="@drawable/ic_headset_mic_white_24dp"
 	             />
             <TextView
                 android:id="@+id/tv_map_talk"

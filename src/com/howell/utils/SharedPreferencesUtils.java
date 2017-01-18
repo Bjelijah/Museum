@@ -1,5 +1,7 @@
 package com.howell.utils;
 
+import com.howell.formuseum.bean.SettingParamInfo;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -13,6 +15,7 @@ public class SharedPreferencesUtils {
 	private static final String spName = "login_set";
 	private static final String spAlarm = "alarm_set";
 	private static final String spLoginTalk = "login_talk";
+	private static final String spSetting = "setting_set";
 	public static void saveLoginInfo(Context mContext,String account,String password,String webserviceIp){
 		SharedPreferences sharedPreferences = mContext.getSharedPreferences(spName, Context.MODE_PRIVATE);
         Editor editor = sharedPreferences.edit();
@@ -85,5 +88,36 @@ public class SharedPreferencesUtils {
 		return sharedPreferences.getString("mac", "");
 	}
 	
+	public static void saveSettingAutoHandleAlarm(Context context, boolean bAuto){
+		SharedPreferences sp = context.getSharedPreferences(spSetting, Context.MODE_PRIVATE);
+		Editor editor = sp.edit();
+		editor.putBoolean("autoHandleAlarm", bAuto);
+		editor.commit();	
+	}
+	
+	public static boolean getSettingIsAutoHandleAlarm(Context c){
+		SharedPreferences sp = c.getSharedPreferences(spSetting, Context.MODE_PRIVATE);
+		return sp.getBoolean("autoHandleAlarm", false);
+	}
+	
+	public static void saveSettingAutoWaitTime(Context context, int second){
+		SharedPreferences sp = context.getSharedPreferences(spSetting, Context.MODE_PRIVATE);
+		Editor editor = sp.edit();
+		editor.putInt("autoWaitTime", second);
+		editor.commit();
+	}
+	
+	public static int getSettingAutoWaitTime(Context c){
+		SharedPreferences sp = c.getSharedPreferences(spSetting, Context.MODE_PRIVATE);
+		return sp.getInt("autoWaitTime", 60);
+	}
+	
+	public static void saveSettingInfo(Context c,SettingParamInfo info){
+		SharedPreferences sp = c.getSharedPreferences(spSetting, Context.MODE_PRIVATE);
+		Editor editor = sp.edit();
+		editor.putBoolean("autoHandleAlarm", info.isbAuto());
+		editor.putInt("autoWaitTime", info.getWaitTime());
+		editor.commit();
+	}
 	
 }

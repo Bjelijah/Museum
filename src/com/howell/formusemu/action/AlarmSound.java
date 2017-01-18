@@ -36,6 +36,7 @@ public class AlarmSound {
 	
 	
 	private void playDeinit(){
+		Log.e("123", "playDeinit");
 		if (soundPool!=null) {
 			soundPool.release();
 			soundPool = null;
@@ -115,7 +116,7 @@ public class AlarmSound {
 		Log.i("123", "play sound alarmdev="+AlarmDev);
 		new Thread(){
 			public void run() {
-				soundPool = new SoundPool(10, AudioManager.STREAM_MUSIC, 100);
+				soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 				soundPool.setOnLoadCompleteListener(new OnLoadCompleteListener() {
 					@Override
 					public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
@@ -131,9 +132,6 @@ public class AlarmSound {
 				}else{
 					soundPool.load(p, 1);
 				}
-				
-				
-				
 			};
 		}.start();
 	}

@@ -16,6 +16,39 @@
             android:textSize="18sp"
             android:text="地图列表" />
 
+        <LinearLayout 
+            android:id="@+id/ll_map_list_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="right|center_vertical"
+            android:layout_marginRight="118dp"
+            
+            
+            >
+            <ImageView 
+                android:id="@+id/iv_map_list_history"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                 android:layout_gravity="center"
+                 android:src="@drawable/ic_history_white_24dp"
+                 
+                />
+            <TextView 
+                android:id="@+id/tv_map_list_history"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                  android:textColor="@color/white"
+	            android:textSize="12sp"
+	            android:text="历史记录" 
+                />
+            
+            
+        </LinearLayout>
+        
+        
+        
+        
 
         <LinearLayout
             android:id="@+id/ll_map_list_talk"
@@ -24,13 +57,17 @@
             android:orientation="vertical"
             android:layout_gravity="right|center_vertical"
             android:paddingRight="10dp" 
-            android:visibility="visible">
+            android:visibility="visible"
+            android:layout_marginRight="44dp">
+            
+            
+             <!-- android:src="@drawable/icon_talk" -->
             <ImageView
 	            android:id="@+id/iv_map_list_talk"
 	            android:layout_gravity="center"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
-	            android:src="@drawable/icon_talk"
+	            android:src="@drawable/ic_headset_mic_white_24dp"
 	             />
             <TextView
                 android:id="@+id/tv_map_list_talk"
@@ -42,6 +79,36 @@
 	            android:text="语音对讲" />
         </LinearLayout>
          
+        <LinearLayout 
+         	android:id="@+id/ll_map_list_setting"
+         	android:layout_width="wrap_content"
+         	android:layout_height="wrap_content"
+         	android:orientation="vertical"
+         	android:layout_gravity="right|center_vertical"
+         	android:paddingRight="10dp"
+         	android:visibility="visible"
+            >
+            
+            <ImageView 
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_settings_white_24dp"
+                />
+            
+            <TextView 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:text="设置"
+                />
+            
+            
+        </LinearLayout>
+        
+        
         
     </FrameLayout>
     

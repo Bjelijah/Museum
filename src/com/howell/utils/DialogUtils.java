@@ -5,6 +5,9 @@ import com.howell.formuseum.R;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.view.View;
 
 /**
  * @author 霍之昊 
@@ -36,4 +39,11 @@ public class DialogUtils {
 	    .setPositiveButton("确定", null)   
 	    .show();  
 	}
+	
+	public static void postAlerDialog(Context context,String msg,  DialogInterface.OnClickListener o){
+		new AlertDialog.Builder(context).setMessage(msg).setPositiveButton("确定",o)
+		.setNegativeButton("取消", null).show();
+	}
+	
+	
 }

@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import android.util.Log;
 
 import com.howell.protocol.entity.AlarmPushConnectRes;
+import com.howell.protocol.entity.EventHandleRes;
 import com.howell.protocol.entity.EventNotify;
 import com.howell.protocol.entity.EventNotifyRes;
 import com.howell.protocol.entity.KeepAlive;
@@ -129,6 +130,22 @@ public class WebSocketProtocolUtils {
 				imageUrl = "";
 			}
 			return new EventNotifyRes(message,cseq,new EventNotify(id,name,eventType,eventState,time,imageUrl));
+		}else if(message == 0x0004){
+			Log.i("123","message get info: alarm clear by other client");
+			JSONObject request = object.getJSONObject("Request");
+			JSONObject notice = request.getJSONObject("Notice");
+			String id = notice.getString("Id");
+			String msg = notice.getString("Message");
+			String classification = notice.getString("Classification");
+//			String time = notice.getString("Time");
+			String time = Utils.utc2TimeZone(notice.getString("Time").substring(0, 19));
+			String status = notice.getString("Status");
+			String sender = notice.getString("Sender");
+			String componentId = notice.getString("ComponentId");
+			String componentName = notice.getString("ComponentName");
+			String noticeType = notice.getString("NoticeType");
+			return new EventHandleRes(message, cseq, new EventHandleRes.Notice(id, msg, classification, time, status, sender, componentId, componentName, noticeType));
+			
 		}
 		return null;
 	}

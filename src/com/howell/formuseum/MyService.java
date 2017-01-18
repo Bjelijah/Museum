@@ -1,14 +1,17 @@
 package com.howell.formuseum;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
+import java.util.logging.MemoryHandler;
 
 import org.json.JSONException;
 
@@ -19,7 +22,10 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 
 import com.howell.db.DBManager;
@@ -28,12 +34,16 @@ import com.howell.formusemu.action.AudioAction;
 import com.howell.formusemu.action.OnAudioComing;
 import com.howell.protocol.Const;
 import com.howell.protocol.CseqManager;
+import com.howell.protocol.HttpProtocol;
+import com.howell.protocol.entity.EventHandleRes;
 import com.howell.protocol.entity.EventNotify;
 import com.howell.protocol.entity.EventNotifyRes;
 import com.howell.protocol.entity.KeepAliveRes;
 import com.howell.utils.DebugUtil;
 import com.howell.utils.DialogUtils;
+import com.howell.utils.MD5;
 import com.howell.utils.SdCardUtil;
+import com.howell.utils.SharedPreferencesUtils;
 import com.howell.utils.SystemUpTimeUtils;
 import com.howell.utils.TalkManager;
 import com.howell.utils.WebSocketConnectionManager;
@@ -44,6 +54,8 @@ import de.tavendo.autobahn.WebSocketConnectionHandler;
 import de.tavendo.autobahn.WebSocketException;
 
 public class MyService extends Service implements Const,OnAudioComing{
+	
+	private static final int MSG_SETTING_DEL_ALARM = 0xff00;
 	
 	private NotificationManager mNotificationManager;  
 	private Notification mNotification; 
@@ -57,6 +69,55 @@ public class MyService extends Service implements Const,OnAudioComing{
 	private String username,websocket_ip,session,webServiceIP,cookieHalf,verify;
 	
 	private Map<String, Integer> alarmSoundMap = null;
+	private AlarmSound alarmSound = null;
+	private HttpProtocol hp;
+	
+	Handler mHandler = new Handler(){
+
+		@Override
+		public void handleMessage(Message msg) {
+			super.handleMessage(msg);
+			switch (msg.what) {
+			case MSG_SETTING_DEL_ALARM:
+				Bundle bundle = msg.getData();
+				delAlarm(bundle.getString("eventID"));
+				break;
+
+			default:
+				break;
+			}
+			
+			
+		}
+		
+	};
+	
+	private void delAlarm(String id){
+		try {
+			hp.process(websocket_ip, 
+					id, 
+					"del_event_id="+id, 
+					cookieHalf+"verifysession="+MD5.getMD5("POST:"+"/howell/ver10/data_service/Business/Informations/IO/Inputs/Channels/"+id+"/Status/Process"+":"+verify));
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void sendDelAlarmMsg(String eventId){
+		if (SharedPreferencesUtils.getSettingIsAutoHandleAlarm(this)) {
+			Message msg = new Message();
+			msg.what = MSG_SETTING_DEL_ALARM;
+			Bundle bundle = new Bundle();
+			bundle.putString("eventID", eventId);
+			msg.setData(bundle);
+			mHandler.sendMessageDelayed(msg, SharedPreferencesUtils.getSettingAutoWaitTime(this)*1000);
+		}
+	}
+	
 	
 	@SuppressWarnings("deprecation")
 //	private void alarmStreamFun(String id,int slot,String ip,String name,int year,int month,int day,int hour,int min,int sec){
@@ -71,7 +132,7 @@ public class MyService extends Service implements Const,OnAudioComing{
     	int temp_id = mgr.selectEventNotifySqlKey(eventNotify);
     	
     	//isAlarmed 0：未查看警报 1：已查看警报
-//    	Log.e("123", "eventState:"+eventState);
+    	Log.e("123", "eventState:"+eventState);
     	if(eventState.equals("Active")){
     		Log.e("alarmStreamFun", "State is Active");
     		
@@ -79,7 +140,7 @@ public class MyService extends Service implements Const,OnAudioComing{
     		 * 语言警报
     		 */
     		
-    		AlarmSound alarmSound = new AlarmSound();
+    		alarmSound = new AlarmSound();
     		alarmSound.playSound(this,name);
 //    		alarmSound.playSound(this,1);
     		
@@ -108,20 +169,15 @@ public class MyService extends Service implements Const,OnAudioComing{
 				method.invoke(extraNotification, 10);
 				Log.e("123", "set method ok");
 			} catch (NoSuchFieldException e) {
-				// TODO Auto-generated catch block
 				Log.i("123","notification   get field error");
 				e.printStackTrace();
 			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (NoSuchMethodException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
     	  */  
@@ -132,7 +188,12 @@ public class MyService extends Service implements Const,OnAudioComing{
     	    notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
     	    PendingIntent contentIntent = PendingIntent.getActivity(context, temp_id, notificationIntent,PendingIntent.FLAG_UPDATE_CURRENT );  
     	    mNotification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);  
+    	    Log.e("123","alarm start notivication id="+temp_id);
     	    mNotificationManager.notify(temp_id,mNotification);  
+    	    
+    	    //报警之后自动消警
+//    	    sendDelAlarmMsg(componentId);//We do not del alarm auto.user should click the alarm icon and decide if he would handle it 
+    	    
     	}else{
     		Log.e("alarmStreamFun", "State is Inactive    type="+ eventType);
 
@@ -198,7 +259,11 @@ public class MyService extends Service implements Const,OnAudioComing{
 			    @Override
 			    public void onTextMessage(String payload) {
 			    	Log.i("log123", "收到报警   playload="+payload);
+			    	
+			    
+			    	
 			    	try {
+			    		//if handle the alarm will receive message:4//FIXME
 						Object res = WebSocketProtocolUtils.parseJSONString(payload);
 						if(res != null){
 							if(res instanceof EventNotifyRes){
@@ -208,13 +273,45 @@ public class MyService extends Service implements Const,OnAudioComing{
 //										,((EventNotifyRes) res).getEventNotify().getDateYear(),((EventNotifyRes) res).getEventNotify().getDateMonth(),((EventNotifyRes) res).getEventNotify().getDateDay()
 //										,((EventNotifyRes) res).getEventNotify().getDateHour(),((EventNotifyRes) res).getEventNotify().getDateMin(),((EventNotifyRes) res).getEventNotify().getDateSec());
 								//if(((EventNotifyRes) res).getEventNotify().getEventState().equals("Active")){
-								alarmStreamFun((EventNotifyRes)res);
+								
+								
+//								checkAndHandleAlarm((EventNotifyRes)res);
+								final EventNotifyRes thisRes =(EventNotifyRes)res;
+								new Thread(){
+									public void run() {
+										
+										Intent intent = new Intent();
+										intent.setAction("com.howell.formuseum.updataReceive");
+										sendBroadcast(intent);
+										try {
+											sleep(500);
+										} catch (InterruptedException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
+										alarmStreamFun(thisRes);
+									};
+								}.start();
+								
+							
+								
 								//}
 								
 								mConnection.sendTextMessage(WebSocketProtocolUtils.createADCResJSONObject(((EventNotifyRes) res).getcSeq()).toString());
 							}else if(res instanceof KeepAliveRes){
 //								Log.e("","KeepAliveRes");
 //								connectionManager.keepAlive();
+							}else if(res instanceof EventHandleRes){
+								//TODO message = 4;
+								Log.i("123", "message="+((EventHandleRes)res).getMessage());
+								EventNotifyRes notifyRes  = new EventNotifyRes();
+								EventNotify notify = new EventNotify();
+								notify.setId(((EventHandleRes) res).getNotice().getComponentID());
+								notify.setName(((EventHandleRes) res).getNotice().getComponentName());
+								notify.setEventState("Inactive");
+								notify.setEventType(((EventHandleRes) res).getNotice().getNoticeType());
+								notifyRes.setEventNotify(notify);
+//								alarmStreamFun(notifyRes);
 							}
 						}
 					} catch (JSONException e) {
@@ -245,6 +342,9 @@ public class MyService extends Service implements Const,OnAudioComing{
 		}
 	}
 	
+
+	
+	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Log.e("service", "start");
@@ -252,6 +352,10 @@ public class MyService extends Service implements Const,OnAudioComing{
 		
 		
 		AudioAction.getInstance().registerOnAudioComing(this);
+		
+		if (hp==null) {
+			hp = new HttpProtocol();
+		}
 		
 		
 //		systemUpTimeUtil = new SystemUpTimeUtils();
@@ -320,12 +424,8 @@ public class MyService extends Service implements Const,OnAudioComing{
 	@Override
 	public void onAudioComing() {
 		AudioAction.getInstance().audioPlay();
-		
 		//talk 界面
 		TalkManager.getInstance().startTalkActivity(this);
-		
-		
-		
 	}
 	
 	

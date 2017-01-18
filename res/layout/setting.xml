@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <FrameLayout 
+        android:layout_width="match_parent"
+        android:layout_height="45dip"
+        android:background="@drawable/tenpay_top_bar"
+        >
+        <TextView 
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:text="设置" 
+       
+            />
+        
+    
+    </FrameLayout>
+    
+    <ScrollView 
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+        
+        <LinearLayout 
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+           
+            
+        
+            >
+            
+            <RelativeLayout 
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+               	android:padding="10dp"
+           
+                >
+                
+           		<TextView 
+           		    android:layout_width="wrap_content"
+           		    android:layout_height="wrap_content"
+           		    android:textColor="@color/black"
+           		    android:textSize="15sp"
+           		    android:text="处理报警方式"
+           		    android:layout_alignParentLeft="true"
+           		    android:layout_centerVertical="true"
+           		    />     
+           		<ToggleButton 
+           		    android:id="@+id/setting_auto_tb"
+           		    android:layout_width="wrap_content"
+           		    android:layout_height="wrap_content"
+           		    android:layout_alignParentRight="true"
+           		    android:layout_centerVertical="true"
+           		    android:textOn="快速处理"
+           		    android:textOff="传统处理"
+           		    />
+           		
+           	<ImageView
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:scaleType="fitXY"
+	            android:src="@drawable/divide_heng" 
+	            android:layout_alignParentBottom="true"/>
+           		
+           		
+           		
+            </RelativeLayout>
+            
+         
+            <RelativeLayout 
+                android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+                android:padding="10dp"
+           		android:visibility="gone"
+                >
+                <TextView 
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+           		    android:textSize="15sp"
+           		    android:text="自动处理时间"
+           		    android:layout_alignParentLeft="true"
+           		    android:layout_centerVertical="true"
+                  
+                    />
+                
+                <TextView 
+                    android:id="@+id/setting_waittime_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    android:textSize="15sp"
+                    android:text="秒"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    />
+                
+                <EditText 
+                    android:id="@+id/setting_waittime_et"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@id/setting_waittime_tv"
+                    
+                 
+                    />
+                
+               <ImageView
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:scaleType="fitXY"
+	            android:src="@drawable/divide_heng" 
+	            android:layout_alignParentBottom="true"/>
+           		
+                
+            </RelativeLayout>
+            
+            
+            
+        </LinearLayout>
+        
+        
+    
+        
+        
+        
+        
+        
+    </ScrollView>
+    
+
+</LinearLayout>

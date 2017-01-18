@@ -3,6 +3,7 @@ package com.howell.utils;
 import java.io.File;
 
 import android.os.Environment;
+import android.util.Log;
 
 public class SdCardUtil {
 	private static String getSDCardPath(){
@@ -13,6 +14,7 @@ public class SdCardUtil {
 	}
 	
 	public static void createAlarmSoundDir(){
+		Log.e("123", "create alarm sounddir");
 		File museumDir = new File(getSDCardPath() + "/museum");
 		if (!museumDir.exists()) {
 			museumDir.mkdirs();

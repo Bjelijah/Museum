@@ -17,6 +17,7 @@ import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
@@ -54,6 +55,7 @@ import com.howell.utils.DialogUtils;
 import com.howell.utils.MD5;
 import com.howell.utils.PhoneConfigUtils;
 import com.howell.utils.ScaleImageUtils;
+import com.howell.utils.SharedPreferencesUtils;
 import com.howell.utils.Utils;
 
 /**
@@ -250,6 +252,11 @@ public class MapActivity extends Activity implements OnClickListener{
 		mTalk = (LinearLayout)findViewById(R.id.ll_map_talk);
 		mTalk.setOnClickListener(this);
 		mTalk.setVisibility(View.VISIBLE);//FIXME
+		
+//		mSetting = (LinearLayout) findViewById(R.id.ll_map_list_setting);
+//		mSetting.setOnClickListener(this);
+		
+		
 		item = new HashMap<ImageView, MapActivity.AlarmThread>();
 		hp = new HttpProtocol();
 		layout = (FrameLayout)findViewById(R.id.fl_map);
@@ -498,47 +505,160 @@ public class MapActivity extends Activity implements OnClickListener{
 			Intent talkIntent = new Intent(this,TalkActivity.class);
 			startActivity(talkIntent);
 			break;
-
+		
+			
 		default:
 			//点击报警闪烁图标
-			for(Entry<ImageView, AlarmThread> entry : item.entrySet()){
-				if(view.getTag().equals(entry.getKey().getTag())){
-					try {
-						//报警闪烁图片设置不可点击
-						entry.getKey().setClickable(false);
-						//闪烁线程标志位置true（关闭线程）
-						entry.getValue().setStopAlarming(true);
-						//回收线程资源
-						entry.getValue().join();
-						//闪烁线程置null
-						item.put(entry.getKey(), null);
-					} catch (InterruptedException e1) {
-						e1.printStackTrace();
-					}
-					Intent intent = new Intent(this,AlarmDetailActivity.class);
-					for(EventNotify e : alarmList){
-						if(e.getId().equals(view.getTag())){
-							intent.putExtra("eventNotify", e);
-							//消除通知栏
-							String ns = Context.NOTIFICATION_SERVICE;  
-							NotificationManager mNotificationManager = (NotificationManager)this.getSystemService(ns); 
-							mNotificationManager.cancel(mgr.selectEventNotifySqlKey(e));
-							//设置数据库地图子模块的isAlarm标志位为1（已查看警报）
-							e.setIsAlarmed(1);//已查看警报
-							mgr.updateEventNotifyAlarmFlag(e);//更新数据库
-							break;
-						}
-					}
-					intent.putExtra("session", session);
-					intent.putExtra("cookieHalf", cookieHalf);
-					intent.putExtra("verify", verify);
-					intent.putExtra("webserviceIp", webserviceIp);
-					startActivity(intent);
-					break;
-				}
+			if (SharedPreferencesUtils.getSettingIsAutoHandleAlarm(this)) {
+				handleAlarmQuick(view);
+			}else{
+				handleAlarmNormal(view);
 			}
 			break;
 		}
+	}
+	
+	private void handleAlarmNormal(View view){
+		for(Entry<ImageView, AlarmThread> entry : item.entrySet()){
+			if(view.getTag().equals(entry.getKey().getTag())){
+				try {
+					//报警闪烁图片设置不可点击
+					entry.getKey().setClickable(false);
+					//闪烁线程标志位置true（关闭线程）
+					entry.getValue().setStopAlarming(true);
+					//回收线程资源
+					entry.getValue().join();
+					//闪烁线程置null
+					item.put(entry.getKey(), null);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+				Intent intent = new Intent(this,AlarmDetailActivity.class);
+				for(EventNotify e : alarmList){
+					if(e.getId().equals(view.getTag())){
+						intent.putExtra("eventNotify", e);
+						//消除通知栏
+						String ns = Context.NOTIFICATION_SERVICE;  
+						NotificationManager mNotificationManager = (NotificationManager)this.getSystemService(ns); 
+					
+						mNotificationManager.cancel(mgr.selectEventNotifySqlKey(e));
+						//设置数据库地图子模块的isAlarm标志位为1（已查看警报）
+						e.setIsAlarmed(1);//已查看警报
+						mgr.updateEventNotifyAlarmFlag(e);//更新数据库
+						break;
+					}
+				}
+				
+				//TODO: if bAuto  we just send handle alarm
+				
+			
+				intent.putExtra("session", session);
+				intent.putExtra("cookieHalf", cookieHalf);
+				intent.putExtra("verify", verify);
+				intent.putExtra("webserviceIp", webserviceIp);
+				startActivity(intent);
+				break;
+			}
+		}
+		
+		
+		
+	}
+	
+	
+	private void handleAlarmQuick(final View view){
+		
+		DialogUtils.postAlerDialog(this, "是否消除报警", new android.content.DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO Auto-generated method stub
+				
+				for(Entry<ImageView, AlarmThread> entry : item.entrySet()){
+					if(view.getTag().equals(entry.getKey().getTag())){
+						try {
+							//报警闪烁图片设置不可点击
+							entry.getKey().setClickable(false);
+							//闪烁线程标志位置true（关闭线程）
+							entry.getValue().setStopAlarming(true);
+							//回收线程资源
+							entry.getValue().join();
+							//闪烁线程置null
+							item.put(entry.getKey(), null);
+						} catch (InterruptedException e1) {
+							e1.printStackTrace();
+						}
+					
+						
+						//TODO: if bAuto  we just send handle alarm
+						
+						new Thread(){
+							public void run() {
+								
+								
+								EventNotify eventNotify = null;
+								for(EventNotify e : alarmList){
+									if(e.getId().equals(view.getTag())){
+										eventNotify = e;
+				
+										//消除通知栏
+										String ns = Context.NOTIFICATION_SERVICE;  
+										NotificationManager mNotificationManager = (NotificationManager)MapActivity.this.getSystemService(ns); 
+										Log.e("123", "del  notification id = "+mgr.selectEventNotifySqlKey(e));
+										mNotificationManager.cancel(mgr.selectEventNotifySqlKey(e));
+										//设置数据库地图子模块的isAlarm标志位为1（已查看警报）
+										e.setIsAlarmed(1);//已查看警报
+										mgr.updateEventNotifyAlarmFlag(e);//更新数据库
+										break;
+									}
+								}
+								
+								
+								try {
+									hp.process(webserviceIp, eventNotify.getId(),"快速处理", cookieHalf+"verifysession="+MD5.getMD5("POST:"+"/howell/ver10/data_service/Business/Informations/IO/Inputs/Channels/"+eventNotify.getId()+"/Status/Process"+":"+verify));
+								} catch (NoSuchAlgorithmException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								} catch (UnsupportedEncodingException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								} catch (JSONException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}catch (Exception e){
+									e.printStackTrace();
+								}
+								
+							};
+						}.start();
+						
+						
+					
+					
+						break;
+					}
+				}
+				
+				
+				
+				
+				
+	
+			}
+		});
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	}
+	
+	private void delNotifyAndAlarm(){
+		
 	}
 	
 	/** 
@@ -625,4 +745,6 @@ public class MapActivity extends Activity implements OnClickListener{
 			}
 		};
 	}
+
+	
 }
