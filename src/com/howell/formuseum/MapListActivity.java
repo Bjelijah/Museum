@@ -256,7 +256,7 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 				MapItemList mapItems = JsonUtils.parseMapsItemJsonObject(new JSONObject(hp.items(webserviceIp, map.getId(), 1,10,cookieHalf+"verifysession="+MD5.getMD5("GET:"+"/howell/ver10/data_service/management/System/Maps/"+map.getId()+"/Items:"+verify))));
 				for(MapItem item : mapItems.getMapItem()){
 					item.setMapId(map.getId());
-//					Log.e("debug", "debug:"+item.toString());
+//					Log.e("123", "debug:"+item.toString());
 					mgr.addMapItem(item);
 				}
 			}

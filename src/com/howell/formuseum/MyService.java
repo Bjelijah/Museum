@@ -267,7 +267,11 @@ public class MyService extends Service implements Const,OnAudioComing{
 						Object res = WebSocketProtocolUtils.parseJSONString(payload);
 						if(res != null){
 							if(res instanceof EventNotifyRes){
-								System.out.println("name:"+((EventNotifyRes) res).getEventNotify().getName());
+//								System.out.println("name:"+((EventNotifyRes) res).getEventNotify().getName());
+								Log.e("123","eventNotify name="+((EventNotifyRes)res).getEventNotify().getName());
+								
+								
+								
 								//System.out.println("ImageUrl:"+((EventNotifyRes) res).getEventNotify().getImageUrl());
 //								alarmStreamFun(((EventNotifyRes) res).getEventNotify().getId(),1,Utils.parseUrl(((EventNotifyRes) res).getEventNotify().getImageUrl()),((EventNotifyRes) res).getEventNotify().getName()
 //										,((EventNotifyRes) res).getEventNotify().getDateYear(),((EventNotifyRes) res).getEventNotify().getDateMonth(),((EventNotifyRes) res).getEventNotify().getDateDay()

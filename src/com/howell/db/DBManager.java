@@ -143,7 +143,9 @@ public class DBManager {
         return -1;
 	}
 	
+	
 	public synchronized boolean containsEventNotify(EventNotify eventNotify) {
+		Log.i("123", "event notify id="+eventNotify.getId());
 	for(EventNotify e:queryAlarmList()){
 		if(e.getId().equals(eventNotify.getId())){
 			return true;
