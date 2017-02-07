@@ -242,7 +242,16 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 //		int height = PhoneConfigUtils.getPhoneHeight(this);
 		try {
 			//获取地图
+			Log.i("123", "[getMaps] 获取地图");
 			MapList maps = JsonUtils.parseMapsJsonObject(new JSONObject(hp.maps(webserviceIp, 1, 10,cookieHalf+"verifysession="+MD5.getMD5("GET:"+"/howell/ver10/data_service/management/System/Maps:"+verify))));
+			if (maps==null) {
+				Log.e("123","get map but maps == null");
+			}
+			if (maps.getMap()==null) {
+				Log.e("123", "maps  get map ==null");
+				
+			}
+			
 			for(Map map : maps.getMap()){
 //				byte[] data = hp.mapsData(webserviceIp, map.getId(), cookieHalf+"verifysession="+MD5.getMD5("GET:"+"/howell/ver10/data_service/management/System/Maps/"+map.getId()+"/Data:"+verify));
 				//存于文件中
@@ -548,6 +557,7 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			// TODO Auto-generated method stub
+			Log.i("123", " [UpdataReceive]:  onReceive");
 			new Thread(){
 				public void run() {
 					MapList maps;
@@ -555,6 +565,7 @@ public class MapListActivity extends Activity implements OnRefreshListener,OnIte
 						maps = JsonUtils.parseMapsJsonObject(new JSONObject(hp.maps(webserviceIp, 1, 10,cookieHalf+"verifysession="+MD5.getMD5("GET:"+"/howell/ver10/data_service/management/System/Maps:"+verify))));
 						//判断是否有更新
 						if(isMapUpdate(maps.getMap(), mapList)){
+							Log.e("123", "[UpdataReceive]  地图有更新 正在更新");
 							updateMaps();
 						}
 					} catch (NoSuchAlgorithmException e) {

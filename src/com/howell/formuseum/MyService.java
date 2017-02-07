@@ -82,14 +82,10 @@ public class MyService extends Service implements Const,OnAudioComing{
 				Bundle bundle = msg.getData();
 				delAlarm(bundle.getString("eventID"));
 				break;
-
 			default:
 				break;
 			}
-			
-			
 		}
-		
 	};
 	
 	private void delAlarm(String id){
@@ -300,6 +296,7 @@ public class MyService extends Service implements Const,OnAudioComing{
 							
 								
 								//}
+								 
 								
 								mConnection.sendTextMessage(WebSocketProtocolUtils.createADCResJSONObject(((EventNotifyRes) res).getcSeq()).toString());
 							}else if(res instanceof KeepAliveRes){

@@ -103,7 +103,7 @@ public class AlarmHistoryAction implements Const{
 	
 	public void getAlarmHistory(){
 		
-		
+		Log.i("123", "start get alarm history");
 		new AsyncTask<Void, Void, Boolean>() {
 			
 			@Override

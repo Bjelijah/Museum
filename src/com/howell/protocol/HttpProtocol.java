@@ -91,7 +91,7 @@ public class HttpProtocol implements Const{
         }finally{
         	client.getConnectionManager().shutdown();  
         }
-		return retSrc;
+		return retSrc;//失败会返回上次的
     }
     
     private byte[] handleHttpProtocol(int retMode,int mode , String url , JSONObject param ,String cookie){
